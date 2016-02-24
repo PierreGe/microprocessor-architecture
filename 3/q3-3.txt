@@ -1,0 +1,5 @@
+	MOVI 1,0x8000
+	MOVI 2,0x8000
+	MUL 5,1,2
+	ADD 3,5,0 // invert the register to respect assignment
+	HALT
