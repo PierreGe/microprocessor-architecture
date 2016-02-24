@@ -1,0 +1,63 @@
+	// MSB n1
+	movi 4,0
+	// LSB n1
+	movi 3,0
+	// MSB n2
+	movi 6,0
+	// LSB n2
+	movi 5,0
+
+	// init mask
+	movi 1,32768
+	nop
+
+	// check if sum(LSB[R1]+LSB[R2])==0
+	// R2 <- MSB[R3] 
+	nand 2,3,1
+	nand 2,2,2
+	// R7 <- MSB[R5]
+	nand 7,5,1
+	nand 7,7,7
+	// R2 <- MSB[R3]+MSB[R5]
+
+	// si R7==1000 0000 ...
+	beq 7,1,jmp
+	// si R2==1000 0000 ...
+	beq 2,1,jmp
+	// sinon MSB[R3]+MSB[R5]==0 => pas de repport
+	beq 0,0,end
+
+	// check if sum(LSB[R1]+LSB[R2])==2
+jmp:	add 2,2,7
+	beq 2,0,carry
+
+	// check else mask sur R1 et R2 
+	movi 1,32767
+	nop
+	
+	// R2 <- LSB15[R3]
+	nand 2,3,1
+	nand 2,2,2
+	// R7 <- LSB15[R5]
+	nand 7,5,1
+	nand 7,7,7
+	
+	// R1 <- LSB15[R3] + LSB15[R5]
+	add 2,2,7
+	
+	// if MSB(LSB15[R3] + LSB15[R5])==0 => pas de carry
+	movi 1,32768
+	nop
+	
+	// R1 <- MSB(LSB15[R3] + LSB15[R5])
+	nand 1,2,1
+	nand 1,1,1
+	
+	beq 1,0,end
+	// R4 <- R4 + 1
+carry:	addi 4,4,1
+	// R4 <- R4 + R6
+end:	add 4,4,6
+	// R3 <- R3 + R5
+	add 3,3,5
+	halt

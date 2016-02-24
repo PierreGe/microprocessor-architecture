@@ -1,0 +1,6 @@
+         MOVI    1,0x8002
+         MOVI    2,0x0005
+         BL      1,2,less
+         BEQ     0,0,greater
+less:    ADDI    3,3,1
+greater: halt

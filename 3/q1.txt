@@ -1,0 +1,33 @@
+We choose the operator “less” : <
+
+Operands are store in reg1 et reg2.
+The result will be stored in reg3
+
+reg3 <- reg1 < reg2
+
+
+We compare positive number
+
+0 < 0
+0x0000 < 0x0000 = 0x0000
+0 and a positive
+0x0000 < 0x0001 = 0x0001
+Two big positive
+0x2000 < 0x6113 = 0x0001
+0x6113 < 0x2000 = 0x0000
+
+
+Then, we compare negative number:
+
+0 and the lowest number
+0x0000 < 0x8000 = 0x0000
+Two negative equals number
+0x8011 < 0x8011 = 0x0000
+Two negative number
+0x8011 < 0xFFFF = 0x0001
+0xFFFF < 0x8011 = 0x0000
+
+Lastly, we compare a positive number with a negative one:
+
+0x811F < 0x0111 = 0x0001
+0x0111 < 0x811F = 0x0000

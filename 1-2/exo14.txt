@@ -1,0 +1,6 @@
+		movi     5,7
+		nop
+		add 	1,5,5
+		addi 	5,1,0
+		halt	
+		

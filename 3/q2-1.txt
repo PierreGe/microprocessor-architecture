@@ -1,0 +1,18 @@
+        MOVI    1,0x8000
+        MOVI    2,0x8006
+        BEQ     1,2,false // check operator equals
+        MOVI    5,0x8000  // bit mask
+        NAND    7,5,1
+        NAND    7,7,7 // apply mask to first number
+        NAND    6,5,2
+        NAND    6,6,6  // apply mask to first number
+        BEQ     6,7,loop // sign differ, goto loop.
+        BEQ     7,5,true
+        BEQ     0,0,false
+loop:   BEQ     1,0,true // naive solution where we decrement each one
+        BEQ     2,0,false
+        ADDI    1,1,-1
+        ADDI    2,2,-1
+        BEQ     0,0,loop
+true:   ADDI    3,3,1
+false:  halt
