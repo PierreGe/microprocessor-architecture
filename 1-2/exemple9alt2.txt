@@ -1,5 +1,5 @@
 	// LSB[n1]
-	movi 1,0xa06
+	movi 1,0xa060
 	// n2
 	movi 2,0x88dc
 
@@ -14,7 +14,7 @@ loop:	beq 2,0,end
          nand 6,6,6
 
 	// no add
-	beq 6,0,endcarry
+	beq 6,0,noad
 	
 	// init mask
 	movi 5,32768
@@ -71,7 +71,7 @@ endcarry:	add 3,3,1
 	add 4,4,7
 	
 	// R7 R4 << 1
-	add 7,7,7
+noad:	add 7,7,7
 	
 	movi 5,32768
 	
@@ -83,7 +83,7 @@ endcarry:	add 3,3,1
 nolshcarry:	add 1,1,1
 
 	// R2 >> 1 (right shift)
-endloop:	addi 5,0,15
+	addi 5,0,15
 
 rshloop:	beq 5,0,rshend
 
