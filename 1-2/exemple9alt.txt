@@ -1,9 +1,20 @@
-	// MSB n1
+	// LSB[n1]
 	movi 1,0
-	// LSB n1
+	// n2
 	movi 2,0
 
+	// MSB[n1]
+	addi 7,0,0
+
 loop:	beq 2,0,end
+	
+	addi 5,0,1
+	// check the first bit of R2
+	nand 6,2,5
+         nand 6,6,6
+
+	// no add
+	beq 6,0,endloop
 
 	// init mask
 	movi 5,32768
@@ -57,8 +68,42 @@ moreCheck:	movi 5,32767
 carry:	addi 4,4,1
 	// R3 <- R3 + R5
 endcarry:	add 3,3,1
+	add 4,4,7
 	
-	addi 2,2,-1
+	// R7 R4 << 1
+	add 7,7,7
+	
+	movi 5,32768
+	
+	nand 6,1,5
+	nand 6,6,6
+
+	beq 6,0,nolshcarry
+	addi 7,7,1
+nolshcarry:	add 1,1,1
+
+	// R2 >> 1 (right shift)
+endloop:	addi 5,0,15
+
+rshloop:	beq 5,0,rshend
+
+	movi 6,32768
+
+	nand 6,2,6
+	nand 6,6,6
+
+	add 2,2,2
+	beq 6,0,noinc
+	
+	addi 2,2,1
+noinc:	addi 5,5,-1
+	
+	beq 0,0,rshloop
+rshend:	movi 6,32767
+
+	nand 2,2,6
+	nand 2,2,2
+
 	beq 0,0,loop
 
 end:	halt

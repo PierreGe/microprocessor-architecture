@@ -1,0 +1,26 @@
+	movi 2,5
+	
+	addi 5,0,15
+
+lshloop:	beq 5,0,lshend
+
+	movi 6,32768
+
+	nand 6,2,6
+	nand 6,6,6
+
+	add 2,2,2
+	beq 6,0,noinc
+	
+	addi 2,2,1
+noinc:	addi 5,5,-1
+	
+	beq 0,0,lshloop
+lshend:	movi 6,32767
+
+	nand 2,2,6
+	nand 2,2,2
+
+	halt
+
+	
