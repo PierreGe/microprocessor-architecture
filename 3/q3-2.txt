@@ -1,70 +1,39 @@
 	// LSB[n1]
-	movi 1,0xa060
+	movi 1,0x7fff
 	// n2
-	movi 2,0x88dc
+	movi 2,0x0007 
 
 	// MSB[n1]
 	addi 7,0,0
 
 loop:	beq 2,0,end
-	
+	addi 5,0,1
 	// check the first bit of R2
-	shifti 6,2,15
+	//and looks usable, maybe bug
+	and 6,2,5
+    //nand 6,6,6
 
 	// no add
 	beq 6,0,noad
-
-	// R6 <- MSB1[R3]
-	shifti 6,3,-15
-	// si MSB[R3]==0 -> second
-	beq 6,0,second
-	// => MSB1[R3]==1
-	// R6 <- MSB[R1]
-	shifti 6,1,-15
-	// si MSB1[R3]==1 && MSB1[R1]==0 -> moreCheck
-	beq 6,0,moreCheck
-	// si MSB1[R3]==1 && MSB1[R1]==1 -> carry
-	beq 0,0,carry
 	
-	// R6 <- MSB1[R1]
-second:	shifti 6,1,-15
-	// MSB1[R3]==0 && MSB1[R1]==0 -> nocarry
-	beq 6,0,endcarry
-	// => MSB1[R3]==0 && MSB1[R1]==1 -> moreCheck
-	//beq 0,0,moreCheck
-
-	// MSB1[R1] || MSB1[R3] == 1
-moreCheck:
-	
-	// R6 <- LSB15[R3]
-	shifti 5,3,1
-	shifti 5,5,-1
-	// R5 <- LSB15[R1]
-	shifti 6,1,1
-	shifti 6,6,-1
-	
-	// R6 <- LSB15[R1] + LSB15[R3]
-	add 6,6,5
-	
-	shifti 6,6,-15
-	beq 6,0,endcarry
+	// R3 <- R3 + R5
+	add 3,3,1,carry
+	beq 0,0,nocarry
 	// R4 <- R4 + 1
 carry:	addi 4,4,1
-	// R3 <- R3 + R5
-endcarry:	add 3,3,1
-	add 4,4,7
+nocarry: add 4,4,7
 	
 	// R7 R4 << 1
 noad:	shifti 7,7,1
-	
-	shifti 6,1,-15
-	beq 6,0,nolshcarry
+	//movi 5,32768
+    //and 6,1,5
+    //beq 6,0,nolshcarry
+    movi 5,32768
+	bl 1,5,nolshcarry
 	addi 7,7,1
-nolshcarry:	shifti 1,1,1
+nolshcarry:	add 1,1,1
 
 	// R2 >> 1 (right shift)
 	shifti 2,2,-1
-
 	beq 0,0,loop
-
 end:	halt
