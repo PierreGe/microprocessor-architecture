@@ -1,7 +1,7 @@
 	// LSB[n1]
-	movi 1,0xa060
+	movi 1,0x7fff
 	// n2
-	movi 2,0x88dc
+	movi 2,0x0007 
 
 	// MSB[n1]
 	addi 7,0,0
@@ -25,8 +25,11 @@ nocarry: add 4,4,7
 	
 	// R7 R4 << 1
 noad:	shifti 7,7,1
-	movi 5,32767
-	bg 1,5,nolshcarry
+	//movi 5,32768
+    //and 6,1,5
+    //beq 6,0,nolshcarry
+    movi 5,32768
+	bl 1,5,nolshcarry
 	addi 7,7,1
 nolshcarry:	add 1,1,1
 
