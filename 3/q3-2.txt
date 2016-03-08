@@ -8,62 +8,46 @@
 
 loop:	beq 2,0,end
 	
-	addi 5,0,1
 	// check the first bit of R2
-	nand 6,2,5
-         nand 6,6,6
+	shifti 6,2,15
 
 	// no add
 	beq 6,0,noad
-	
-	// init mask
-	movi 5,32768
 
 	// R6 <- MSB1[R3]
-	nand 6,3,5
-	nand 6,6,6
-	// si MSB1[R3]==1 -> second
-	beq 6,5,second
-	// => MSB1[R3]==0
-	// R6 <- MSB1[R1]
-	nand 6,1,5
-	nand 6,6,6
-	// si MSB1[R1]==1
-	beq 6,5,moreCheck
-	// => MSB1[R3]==0 && MSB1[R1]==0 -> end (no carry)
-	beq 0,0,endcarry
+	shifti 6,3,-15
+	// si MSB[R3]==0 -> second
+	beq 6,0,second
+	// => MSB1[R3]==1
+	// R6 <- MSB[R1]
+	shifti 6,1,-15
+	// si MSB1[R3]==1 && MSB1[R1]==0 -> moreCheck
+	beq 6,0,moreCheck
+	// si MSB1[R3]==1 && MSB1[R1]==1 -> carry
+	beq 0,0,carry
 	
-	// => n1==1
 	// R6 <- MSB1[R1]
-second:	nand 6,1,5
-	nand 6,6,6
-	// si MSB1[R1]==1
-	beq 6,5,carry
-	// => n1==1 && n2==0
-	beq 0,0,moreCheck
-
+second:	shifti 6,1,-15
+	// MSB1[R3]==0 && MSB1[R1]==0 -> nocarry
+	beq 6,0,endcarry
+	// => MSB1[R3]==0 && MSB1[R1]==1 -> moreCheck
+	//beq 0,0,moreCheck
 
 	// MSB1[R1] || MSB1[R3] == 1
-moreCheck:	movi 5,32767
+moreCheck:
 	
 	// R6 <- LSB15[R3]
-	nand 6,3,5
-	nand 6,6,6
+	shifti 5,3,1
+	shifti 5,5,-1
 	// R5 <- LSB15[R1]
-	nand 5,1,5
-	nand 5,5,5
+	shifti 6,1,1
+	shifti 6,6,-1
 	
 	// R6 <- LSB15[R1] + LSB15[R3]
 	add 6,6,5
 	
-	// if MSB(LSB15[R3] + LSB15[R5])==0 => pas de carry
-	movi 5,32768
-	
-	// R1 <- MSB(LSB15[R3] + LSB15[R5])
-	nand 5,6,5
-	nand 5,5,5
-	
-	beq 5,0,endcarry
+	shifti 6,6,-15
+	beq 6,0,endcarry
 	// R4 <- R4 + 1
 carry:	addi 4,4,1
 	// R3 <- R3 + R5
@@ -71,38 +55,15 @@ endcarry:	add 3,3,1
 	add 4,4,7
 	
 	// R7 R4 << 1
-noad:	add 7,7,7
+noad:	shifti 7,7,1
 	
-	movi 5,32768
-	
-	nand 6,1,5
-	nand 6,6,6
-
+	shifti 6,1,-15
 	beq 6,0,nolshcarry
 	addi 7,7,1
-nolshcarry:	add 1,1,1
+nolshcarry:	shifti 1,1,1
 
 	// R2 >> 1 (right shift)
-	addi 5,0,15
-
-rshloop:	beq 5,0,rshend
-
-	movi 6,32768
-
-	nand 6,2,6
-	nand 6,6,6
-
-	add 2,2,2
-	beq 6,0,noinc
-	
-	addi 2,2,1
-noinc:	addi 5,5,-1
-	
-	beq 0,0,rshloop
-rshend:	movi 6,32767
-
-	nand 2,2,6
-	nand 2,2,2
+	shifti 2,2,-1
 
 	beq 0,0,loop
 
