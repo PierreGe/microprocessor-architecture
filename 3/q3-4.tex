@@ -12,8 +12,33 @@
 \begin{document}
 \maketitle
 
-\section{Section 1}
+\section{Summary}
 
-Text
+We have now three way of doing a multiplication :
+\begin{itemize}
+	\item Using the original instruction set,
+	\item Using the special instruction set,
+	\item Using the MUL instruction.
+\end{itemize}
+
+\section{Performance}
+
+Let's take a complicate multiplication 41056*35036 to measure performance and be able to conclude from those data:
+
+\begin{center}
+  \begin{tabular}{ | l | c | r |}
+    \hline
+     & Instructions & CPI \\ \hline
+    Original & 2683 & 1.38 \\ \hline
+    Special & 341 & 1.32 \\ \hline
+    MUL & 7 & 1.57 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\section{Conclusion}
+Data shown above speak for themselves. The efficency of the multiplication operation is significantly better when the instruction set is extended even if the complexity of multiplication is linear in every case.
+
+That is a really interesting because it tends to show us that both a considerable instruction set and software that use all its potential will make programs execute faster.
 
 \end{document}
