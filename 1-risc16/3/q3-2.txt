@@ -10,8 +10,8 @@ loop:	beq 2,0,end
 	addi 5,0,1
 	// check the first bit of R2
 	//and looks usable, maybe bug
-	and 6,2,5
-    //nand 6,6,6
+	nand 6,2,5
+    	nand 6,6,6
 
 	// no add
 	beq 6,0,noad
