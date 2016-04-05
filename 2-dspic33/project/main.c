@@ -34,7 +34,7 @@ void main(void){
 
             // operation pour obtenir l'indice dans l'array EN_r et EN_i
             unsigned16temp = (k * n); // we do not need to cast to INT16 k and n (example1.c)
-            m = (INT8U) (unsigned16temp / (INT16U) N); // m is rounded to the nearest integer here, if inputs are correct it should be castable to int8
+            m = (INT8U) (unsigned16temp / (INT16U) N); // m is rounded to the nearest (lowest) integer here, if inputs are correct it should be castable to int8
 
             // computation for real part
             signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m]; // cast as done in exemple2.c
