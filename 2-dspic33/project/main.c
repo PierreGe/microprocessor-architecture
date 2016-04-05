@@ -33,20 +33,20 @@ void main(void){
         for (n = first_sample; n != first_sample-1; n= (n+1) % N){
 
             // operation pour obtenir l'indice dans l'array EN_r et EN_i
-            unsigned16temp = (k * n); // INT16 = INT8 * INT8 TODO cast avant ?
+            unsigned16temp = (k * n); // we do not need to cast to INT16 k and n (example1.c)
             m = (INT8U) (unsigned16temp / (INT16U) N); // m is rounded to the nearest integer here, if inputs are correct it should be castable to int8
 
             // computation for real part
-            signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];
-            signed8temp = signed16temp_r >>8; // we shift the value and loose some accuracy
+            signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m]; // cast as done in exemple2.c
+            signed8temp = (signed16temp_r+128) >> 8; // we round and then shift the value and loose some accuracy
             // we shift because we want to keep the most significant bits of the fixed point
             ;
-            signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];
+            signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k]; // TODO see other todo below
             ;
 
             // computation for imaginary part
             signed16temp_i = (INT16S)input[n] * (INT16S) en_i[m];
-            signed8temp = signed16temp_i >>8; // we shift the value and loose some accuracy
+            signed8temp = (signed16temp_i+128) >> 8; // we round and then shift the value and loose some accuracy
             ;
             signed16temp_i = (INT16S) signed8temp + (INT16S) output_i[k];
             ;
