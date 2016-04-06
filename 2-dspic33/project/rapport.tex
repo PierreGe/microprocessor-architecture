@@ -68,8 +68,8 @@ If the input are in there correct range, no overflow will occur because m must b
 
 \verb|signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];|
 \\
-First we cast the two 8 bits fixed point integer to two 16 bits fixed point integer so the sign will be correct.
-Then since the number stands on 8 bits, it's similar to above for the justification that no overflow happens. Borderline case :   $ 1111\ 1111 * 1111\ 1111 = 1111\ 1110\ 0000\ 0001 $. There is no information lost so the accuracy is maximum.
+The two 8 bits fixed point integer are cast to two 16 bits fixed point integer so the sign will be correct.
+Then since the number stands on 8 bits, it's similar to above for the justification that no overflow happen. Borderline case :   $ 1111\ 1111 * 1111\ 1111 = 1111\ 1110\ 0000\ 0001 $. There is no information lost so the accuracy is maximum.
 \\
 \verb|signed8temp = (signed16temp_r+128) >> 8;|
 \\
@@ -77,12 +77,19 @@ Here no overflow could happen. % TODO accuracy
 \\
 \verb|signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];|
 \\
-% TODO
+The two 8 bits fixed point integer are cast to two 16 bits fixed point integer so the sign will be correct.
+Since we put the result of the addition of two number standing on 8 bits in a 16 bits variable no overflow can happen and the accuracy is maximum. Borderline case : $ 1111\ 1111 + 1111\ 1111 = 0000\ 0001\ 1111\ 1110 $
 
 \subsection{Computation of the imaginary part}
 
 Actually it is the same as the real part with other variables.
 
+\subsection{Adding value to output}
+
+\verb|output_r[k] = (INT8S) (signed16temp_r >> 7);|
+\verb|output_i[k] = (INT8S) (signed16temp_i >> 7);|
+
+% TODO accuracy
 
 
 \section{Question 4}
