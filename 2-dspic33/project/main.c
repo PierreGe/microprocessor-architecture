@@ -51,7 +51,7 @@ void main(void){
             signed16temp_i = (INT16S) signed8temp + signed16temp_i;
             ;
         }
-        output_r[k] = (INT8S) (signed16temp_r >> 7); // TODO : PROBABLY WRONG
+        output_r[k] = (INT8S) (signed16temp_r >> 7); // Shift to keep the most significant bit
         output_i[k] = (INT8S) (signed16temp_i >> 7);
     }
 
