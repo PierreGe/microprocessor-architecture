@@ -50,8 +50,7 @@ At last we add the element of the sum to a temporary 16 bits register. We use a 
 
 \subsection{Computation of the imaginary part}
 
-Actually it is the same as the real part with other names for variables.
-
+Actually it is the same as the real part with other variables.
 
 \section{Question 3}
 
@@ -59,11 +58,11 @@ Actually it is the same as the real part with other names for variables.
 
 \verb|unsigned16temp = (k * n);|
 
-Since we do INT16 = INT8 * INT8 no overflow will occur ( $2{8}*2{8} = 2{16}$ ). There is no information lost so the accuracy is maximum.
+Since we do INT16 = INT8 * INT8 no overflow will occur. Let's take a look at a borderline case :   $ 1111\ 1111 * 1111\ 1111 = 1111\ 1110\ 0000\ 0001 $. There is no information lost so the accuracy is maximum.
 
 \verb|m = (INT8U) (unsigned16temp / (INT16U) N);|
 
-If the input are in there correct range, no overflow will occur because m must be between 0 and 127 included, so it is ok to cast it to a 8 bit integer. Some precision can be lost during the division since the result is a integer all the time. Plus it loose the decimal, so for example $1.9$ will be $1$ if interpreted as an integer instead of 2 for the nearest integer.
+If the input are in there correct range, no overflow will occur because m must be between 0 and 127 included, so it is ok to cast it to a 8 bit integer. Some precision can be lost during the division since the result is a integer all the time. Plus it loose the decimal, so for instance $1.9$ will be $1$ if interpreted as an integer instead of 2 for the nearest integer. Let's take a look at another (non-trivial) borderline case :   $ 0000\ 0001 * 0000\ 0001\ /\ N = 0000\ 0000\ 0000\ 0001 / 128 \Leftrightarrow 0000\ 0000\ 0000\ 0001 \gg 8 = 0000\ 0000 $.
 
 \subsection{Computation of the real part}
 
