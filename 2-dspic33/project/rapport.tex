@@ -32,24 +32,25 @@
 \verb|m = (INT8U) (unsigned16temp / (INT16U) N);|
 \\
 
-If we directly do the computation $ m = k*n/N $ we would get a wrong result. In fact the multiplication would be too big some the result would overflow and be wrong. To solve that problem, we use a inte rmediate var of 16bit to store the result of the multiplication and then do the division and then cast it back to 8 bits, the cast should be correct because the result of the division should stands on 8bits if the inputs are correct.
+If we directly do the computation $ m = k*n/N $ we would get a wrong result. In fact the multiplication would be too big and some of the result could overflow and be wrong. To solve that problem, we use a intermediate variable of 16bit to store the result of the multiplication. We then do the division and then cast it back to 8 bits. The cast should be correct because the result of the division (m) should stands on 8 bits if the inputs are correct.
 
 \subsection{Computation of the real part}
 
 \verb|signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];|
 \\
-First we cast the 8 bits fixed point integer to two 16bits fixed point integer and then do the multiplication as shown in the $example2.c$. We put the result in a 16bits integer so the result would be correc\\
+First we cast the two 8 bits fixed point integer to two 16 bits fixed point integer and then do the multiplication as shown in the $example2.c$. We put the result in a 16bits integer so the result would be correct.
+\\
 \verb|signed8temp = (signed16temp_r+128) >> 8;|
 \\
-Then we are required to put the result in a 8 bits register so to get better result we first round it  and then do the shift to get the most significant bits
+Then we are required to put the result in a 8 bits register, so to get better result we first round it and then do the shift to only keep the most significant bits.
 \\
 \verb|signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];|
 \\
-% TODO a verifier si c'est bon ..
+At last we add the element of the sum to a temporary 16 bits register. We use a 16 bits temporary variable because the addition of two number on 8 bits could overflow.
 
 \subsection{Computation of the imaginary part}
 
-Actually it is the same as the real part with othe variable name
+Actually it is the same as the real part with other names for variables.
 
 
 \section{Question 3}
