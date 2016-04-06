@@ -95,8 +95,12 @@ The important point is that the buffer can't be modified during the execution of
 
 The algorithm need % TODO number of cycle.
 
-The time for a cycle depends of the frequency of the internal clock
+The time for a cycle depends of the frequency of the internal clock.
 
-%TODO
+If we suppose that the frequency of the microcontroller is 8MHZ as written in the manual, a cycle would take $ \frac{1}{8 * 10^{6} }$.
+
+So the maximum time between two buffer update is % cycle-time * nbr-cycle
+
+And the maximum frequency is % 1 / temps-max
 
 \end{document}
