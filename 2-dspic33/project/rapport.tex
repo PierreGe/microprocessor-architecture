@@ -66,15 +66,20 @@ If the input are in there correct range, no overflow will occur because m must b
 
 \subsection{Computation of the real part}
 
-%TODO
+In this part, the input value and the points of the Fourier Transform are stored in signed 8 bits integer each. 
+\\
+\verb|signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];|
+\\
+The values are between $[-128;127]$. The variable signed16temp\_r is signed 16bits integer, playing the role of accumulator. It acculates N values where N is equal to 128 which means that the final value of signed16temp\_r is between $[-128*128;127*128]$ but must be stored in a signed 8 bits integer. 
+\\
+\verb|output_r[k] = (INT8S) (signed16temp_r >> 7);|
+\\
+
+There is a loss of the last 7 bits. 
 
 \subsection{Computation of the imaginary part}
 
-%TODO
-
-
-\verb INT16S = INT8S * INT8S
-
+Actually it is the same as the real part with other variable name
 
 \section{Question 4}
 The more the frequency grows, the nearest the sample are. So that mean that two sample will have almost the same value. From a certain point, we might see that the sample will have the same value.

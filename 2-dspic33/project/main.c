@@ -41,14 +41,14 @@ void main(void){
             signed8temp = (signed16temp_r+128) >> 8; // we round and then shift the value and loose some accuracy
             // we shift because we want to keep the most significant bits of the fixed point
             ;
-            signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k]; // TODO see other todo below
+            signed16temp_r = (INT16S) signed8temp + signed16temp_r; // TODO see other todo below
             ;
 
             // computation for imaginary part
             signed16temp_i = (INT16S)input[n] * (INT16S) en_i[m];
             signed8temp = (signed16temp_i+128) >> 8; // we round and then shift the value and loose some accuracy
             ;
-            signed16temp_i = (INT16S) signed8temp + (INT16S) output_i[k];
+            signed16temp_i = (INT16S) signed8temp + signed16temp_i;
             ;
         }
         output_r[k] = (INT8S) (signed16temp_r >> 7); // TODO : PROBABLY WRONG
