@@ -51,8 +51,8 @@ void main(void){
             signed16temp_i = (INT16S) signed8temp + (INT16S) output_i[k];
             ;
         }
-        output_r[k] = (INT8S) signed16temp_r ; // TODO : PROBABLY WRONG
-        output_i[k] = (INT8S) signed16temp_i;
+        output_r[k] = (INT8S) (signed16temp_r >> 7); // TODO : PROBABLY WRONG
+        output_i[k] = (INT8S) (signed16temp_i >> 7);
     }
 
     // 4 lines to print the result
