@@ -38,7 +38,7 @@ If we directly do the computation $ m = k*n/N $ we would get a wrong result. In 
 
 \verb|signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];|
 \\
-First we cast the two 8 bits fixed point integer to two 16 bits fixed point integer and then do the multiplication as shown in the $example2.c$. We put the result in a 16bits integer so the result would be correct.
+First we cast the two 8 bits fixed point integer to two 16 bits fixed point integer to avoid sign trouble and then do the multiplication as shown in the $example2.c$. We put the result in a 16bits integer so the result would be correct.
 \\
 \verb|signed8temp = (signed16temp_r+128) >> 8;|
 \\
@@ -66,14 +66,23 @@ If the input are in there correct range, no overflow will occur because m must b
 
 \subsection{Computation of the real part}
 
-%TODO
+\verb|signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];|
+\\
+First we cast the two 8 bits fixed point integer to two 16 bits fixed point integer so the sign will be correct.
+Then since the number stands on 8 bits, it's similar to above for the justification that no overflow happens. Borderline case :   $ 1111\ 1111 * 1111\ 1111 = 1111\ 1110\ 0000\ 0001 $. There is no information lost so the accuracy is maximum.
+\\
+\verb|signed8temp = (signed16temp_r+128) >> 8;|
+\\
+Here no overflow could happen. % TODO accuracy
+\\
+\verb|signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];|
+\\
+% TODO
 
 \subsection{Computation of the imaginary part}
 
-%TODO
+Actually it is the same as the real part with other variables.
 
-
-\verb INT16S = INT8S * INT8S
 
 
 \section{Question 4}
