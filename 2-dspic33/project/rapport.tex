@@ -9,7 +9,7 @@
 \usepackage[colorinlistoftodos]{todonotes}
 
 \title{dsPIC33: Exercise}
-\author{Pierre Gerard, Julian Schrembi, Francois Schiltz}
+\author{Pierre Gerard, Julian Schembri, Francois Schiltz}
 
 \setlength{\parindent}{0pt}
 
@@ -93,14 +93,18 @@ Actually it is the same as the real part with other variables.
 \section{Question 4}
 The important point is that the buffer can't be modified during the execution of the algorithm. That means that the time between two update should be superior to the execution time of the algorithm.
 
-The algorithm need 8 034 537 cycles to run. We used the debugger to get that value, which is more precise than a approximation using the sum of individual operation done in the lab.
+\begin{center}
+\includegraphics[scale=0.5]{files/stopwatch.png} 
+\end{center}
+
+The algorithm need 1 777 891 cycles to run. We used the debugger to get that value, which is more precise than a approximation using the sum of individual operation done in the lab.
 
 The time for a cycle depends of the frequency of the internal clock.
 
-If we suppose that the frequency of the microcontroller is 120MHZ as suggested by the debugger, a cycle would take $ \frac{1}{120 * 10^{6} }$.
+If we suppose that the frequency of the microcontroller is 120MHZ as suggested by the debugger, a cycle would take $ \frac{1}{60 * 10^{6} }$.
 
-So the maximum time between two buffer update is $ \frac{1}{120 * 10^{6} } * 8 034 537 = 133.9 ms $
+So the maximum time between two buffer update is $ \frac{1}{60 * 10^{6} } * 1 777 891 =  29,63 ms $
 
-And the maximum frequency for buffer updtae is about 7.46 Hz. 
+And the maximum frequency for buffer updtae is about 33.75 Hz. 
 
 \end{document}
