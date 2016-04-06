@@ -32,25 +32,25 @@
 \verb|m = (INT8U) (unsigned16temp / (INT16U) N);|
 \\
 
-If we directly do the computation $ m = k*n/N $ we would get a wrong result. In fact the multiplication would be too big some the result would overflow and be wrong. To solve that problem, we use a intermediate var of 16bit to store the result of the multiplication and then do the division and then cast it back to 8 bits, the cast should be correct because the result of the division should stands on 8bits if the inputs are correct.
+If we directly do the computation $ m = k*n/N $ we would get a wrong result. In fact the multiplication would be too big and some of the result could overflow and be wrong. To solve that problem, we use a intermediate variable of 16bit to store the result of the multiplication. We then do the division and then cast it back to 8 bits. The cast should be correct because the result of the division (m) should stands on 8 bits if the inputs are correct.
 
 \subsection{Computation of the real part}
 
 \verb|signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];|
 \\
-First we cast the 8 bits fixed point integer to two 16bits fixed point integer and then do the multiplication as shown in the $example2.c$. We put the result in a 16bits integer so the result would be correct\\
+First we cast the two 8 bits fixed point integer to two 16 bits fixed point integer to avoid sign trouble and then do the multiplication as shown in the $example2.c$. We put the result in a 16bits integer so the result would be correct.
+\\
 \verb|signed8temp = (signed16temp_r+128) >> 8;|
 \\
-Then we are required to put the result in a 8 bits register so to get better result we first round it  and then do the shift to get the most significant bits
+Then we are required to put the result in a 8 bits register, so to get better result we first round it and then do the shift to only keep the most significant bits.
 \\
 \verb|signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];|
 \\
-% TODO a verifier si c'est bon ..
+At last we add the element of the sum to a temporary 16 bits register. We use a 16 bits temporary variable because the addition of two number on 8 bits could overflow.
 
 \subsection{Computation of the imaginary part}
 
-Actually it is the same as the real part with other variable name
-
+Actually it is the same as the real part with other variables.
 
 \section{Question 3}
 
@@ -66,24 +66,33 @@ If the input are in there correct range, no overflow will occur because m must b
 
 \subsection{Computation of the real part}
 
-In this part, the input value and the points of the Fourier Transform are stored in signed 8 bits integer each. 
+\verb|signed16temp_r = (INT16S)input[n] * (INT16S) en_r[m];|
 \\
-\verb|signed16temp_r = (INT16S) signed8temp + (INT16S) output_r[k];|
+The two 8 bits fixed point integer are cast to two 16 bits fixed point integer so the sign will be correct.
+Then since the number stands on 8 bits, it's similar to above for the justification that no overflow happen. Borderline case :   $ 1111\ 1111 * 1111\ 1111 = 1111\ 1110\ 0000\ 0001 $. There is no information lost so the accuracy is maximum.
 \\
-The values are between $[-128;127]$. The variable signed16temp\_r is signed 16bits integer, playing the role of accumulator. It acculates N values where N is equal to 128 which means that the final value of signed16temp\_r is between $[-128*128;127*128]$ but must be stored in a signed 8 bits integer. 
+\verb|signed8temp = (signed16temp_r+128) >> 8;|
 \\
-\verb|output_r[k] = (INT8S) (signed16temp_r >> 7);|
+Here no overflow could happen. But the last 8 bits are lost.
 \\
+\verb|signed16temp_r = (INT16S) signed8temp + signed16temp_r;|
+\\
+The values signed8temp are between $[-128;127]$. The variable signed16temp\_r is signed 16 bits integer, playing the role of accumulator. It acculates N values where N is equal to 128 which means that the final value of signed16temp\_r is between $[-128*128;127*128]$.
+\\
+Since we put the result of the addition of two number standing on 8 bits in a 16 bits variable no overflow can happen and the accuracy is maximum. Borderline case : $ 1111\ 1111 + 1111\ 1111 = 0000\ 0001\ 1111\ 1110 $.
 
-There is a loss of the last 7 bits. 
+\verb|output_r[k] = (INT8S) (signed16temp_r >> 7);|
+
+ Output\_r are stored in a signed 8 bits integer that's why the last 7 bits are lost.
+
 
 \subsection{Computation of the imaginary part}
 
-Actually it is the same as the real part with other variable name
+Actually it is the same as the real part with other variables.
 
 \section{Question 4}
 The more the frequency grows, the nearest the sample are. So that mean that two sample will have almost the same value. From a certain point, we might see that the sample will have the same value.
 
-% TODO est ce qu'ils veulent une valeur précise ?
+% TODO ils veulent une valeur précise avec des nombres du labo
 
 \end{document}
