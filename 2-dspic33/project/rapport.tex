@@ -75,7 +75,7 @@ Then since the number stands on 8 bits, it's similar to above for the justificat
 \\
 Here no overflow could happen. But the last 8 bits are lost.
 Since it's signed we lost the precision after the 7th bit of the value.
-The accuracy is about $ \frac{1}{2} ^{7}$
+The accuracy of the result is about $ \frac{1}{2} ^{7}$
 \\
 \verb|signed16temp_r = (INT16S) signed8temp + signed16temp_r;|
 \\
@@ -86,7 +86,7 @@ Since we put the result of the addition of two number standing on 8 bits in a 16
 \verb|output_r[k] = (INT8S) (signed16temp_r >> 7);|
 
 Output\_r are stored in a signed 8 bits integer that's why the last 7 bits are lost. This time the shift is 7 and not 8 because there is only 128 ($ 2^{7} $) addition.
-The accuracy is the same as above, about $ \frac{1}{2} ^{7} $
+The accuracy of the result is the same as above, about $ \frac{1}{2} ^{7} $
 
 \subsection{Computation of the imaginary part}
 
