@@ -101,9 +101,9 @@ The algorithm need 1 777 891 cycles to run. We used the debugger to get that val
 
 The time for a cycle depends of the frequency of the internal clock.
 
-If we suppose that the frequency of the microcontroller is 120MHZ as suggested by the debugger, a cycle would take $ \frac{2}{1200 * 10^{6} }$. The 2 stands there because on the pic33 it takes 2 clock cycle for an instruction cycle.
+If we suppose that the frequency of the microcontroller is 120MHZ as suggested by the debugger, a cycle would take $ \frac{2}{120 * 10^{6} }$. The 2 stands there because on the pic33 it takes 2 clock cycle for an instruction cycle.
 
-So the maximum time between two buffer update is $ \frac{2}{1200 * 10^{6} } * 1 777 891 =  29,63 ms $
+So the maximum time between two buffer update is $ \frac{2}{120 * 10^{6} } * 1 777 891 =  29,63 ms $
 
 And the maximum frequency for buffer updtae is about 33.75 Hz. 
 
