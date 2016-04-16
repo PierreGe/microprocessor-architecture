@@ -60,59 +60,12 @@ int writeFile(const char * path, const RAW rawData){
 
 
 void applyTransfoInC(const RAW data, const unsigned char threshold){
-    for (size_t i = 0; i < data.size; ++i){
-        if (data.content[i] < threshold){
-            data.content[i] = 0;
-        }
-        else{
-            data.content[i] = 255;
-        }
-    }
+
 
 }
 
 void applyTransfoInSIM(const RAW file, const unsigned char threshold){
-    unsigned char comp[16];
-    for (size_t i = 0; i < 16; ++i)
-        comp[i] = threshold;
-    unsigned char* _comp = &comp[0];
 
-    uint64_t sign[2];
-    sign[0] = 0x8080808080808080;
-    sign[1] = 0x8080808080808080;
-    uint64_t* _sign = &sign[0];
-
-    size_t l = file.size / 16;
-    unsigned char * _ptr = &file.content[0];
-
-    __asm__ (
-            "mov %%ebx,%1\n\t;" //comp
-            "movdqu %%xmm1,(%%ebx)\n\t;"
-            "mov %%ebx,%2\n\t;" // read sign
-            "movdqu %%xmm2,(%%ebx)\n\t;"
-            "paddb %%xmm1,%%xmm2\n\t;"
-            "mov %%ecx,%3\n\t;" //l
-            "mov %%ebx,%4\n\t;" // ptr
-
-            "loop:"
-                "movdqu %%xmm0,(%%ebx)\n\t;"
-                "paddb %%xmm0,%%xmm2\n\t;" // Add Packed Integers
-                "pcmpgtb %%xmm0,%%xmm1\n\t;" // Compare Packed Signed Integers for Greater Than
-                "movdqu (%%ebx),%%xmm0\n\t;"
-                "add %%ebx,16\n\t;"
-                "sub %%ecx,1\n\t;"
-                "jnz loop\n\t;"
-
-            "emms\n\t;" //clean
-
-            : "=r" (sign)  /* output operands */
-            : "r" (comp), "r" (sign), "g" (l), "m" (_ptr) /* input operands */
-            : "%ebx",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
-    );
-
-    for (size_t i = 0; i < file.size % 16; ++i){
-        file.content[i] = file.content[i] > threshold ? 255 : 0;
-    }
 
 }
 
@@ -127,8 +80,8 @@ int main() {
 
     // file path
     const char inpath[] = "test.raw";
-    const char outpathC[] = "test_threshold_c.raw";
-    const char outpathASM[] = "test_threshold_simd.raw";
+    const char outpathC[] = "test_minmax_c.raw";
+    const char outpathASM[] = "test_minmax_simd.raw";
 
     // image threshold for black OR white
     const unsigned char threshold = 54;
