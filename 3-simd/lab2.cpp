@@ -6,15 +6,18 @@
 // Pierre Gerard, Julian Schrembri, Francois Schiltz
 
 
+// what? no min max in C ? no problem
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
 
 // Struct that contains the data
 struct RAW {
     unsigned char * content; // unisgned char -> a raw byte
-    size_t size;
+    size_t size, width;
 };
 
 
-int loadFile(const char* fileName, RAW& rawData){
+int loadFile(const char* fileName, RAW& rawData, size_t defwidth){
 
     FILE * fd = fopen(fileName, "rb"); // reading in binary mode
 
@@ -35,6 +38,8 @@ int loadFile(const char* fileName, RAW& rawData){
     }
     fread(rawData.content, sizeof(unsigned char), rawData.size, fd);
 
+    rawData.width = defwidth;
+
     return 1;
 }
 
@@ -50,31 +55,112 @@ int writeFile(const char * path, const RAW rawData){
     // writing
     fwrite(rawData.content, sizeof(unsigned char), rawData.size, fd);
 
-    // we free memory back
-    free(rawData.content);
-
     return 1;
 }
 
 
 
 
-void applyMinTransfoInC(const RAW data, const unsigned char threshold){
+void applyMinTransfoInC(const RAW data, RAW res){
+
+    unsigned int m = 255;
+    for (size_t w = 0; w < data.width ; ++w) {
+        for (size_t h = 0; h < (data.size / data.width); ++h) {
+            // center
+            m = min(m, data.content[w * data.width + h]);
+            // left
+            if (w-1 > 0){
+                m = min(m, data.content[(w-1) * data.width + (h)]);
+            }
+            // right
+            if (w+1 < data.width){
+                m = min(m, data.content[(w+1) * data.width + (h)]);
+            }
+            // bottom
+            if (h-1 > 0){
+                m = min(m, data.content[(w) * data.width + (h-1)]);
+            }
+            // top
+            if (h+1 < (data.size / data.width)){
+                m = min(m, data.content[(w) * data.width + (h+1)]);
+            }
+            // bottom left
+            if (h-1 > 0 and w-1 > 0){
+                m = min(m, data.content[(w-1) * data.width + (h-1)]);
+            }
+            // bottom right
+            if (w+1 < data.width and h-1 > 0){
+                m = min(m, data.content[(w+1) * data.width + (h-1)]);
+            }
+            // top left
+            if (h+1 < (data.size / data.width) and w-1 > 0){
+                m = min(m, data.content[(w-1) * data.width + (h+1)]);
+            }
+            // top right
+            if (h+1 < (data.size / data.width) and w+1 < data.width){
+                m = min(m, data.content[(w+1) * data.width + (h+1)]);
+            }
+            // set the value
+            res.content[w * data.width + h] = m;
+            m = 255;
+
+        }
+    }
+}
+
+void applyMaxTransfoInC(const RAW data, RAW res){
+    unsigned int m = 0;
+    for (size_t w = 0; w < data.width ; ++w) {
+        for (size_t h = 0; h < (data.size / data.width); ++h) {
+            // center
+            m = max(m, data.content[w * data.width + h]);
+            // left
+            if (w-1 > 0){
+                m = max(m, data.content[(w-1) * data.width + (h)]);
+            }
+            // right
+            if (w+1 < data.width){
+                m = max(m, data.content[(w+1) * data.width + (h)]);
+            }
+            // bottom
+            if (h-1 > 0){
+                m = max(m, data.content[(w) * data.width + (h-1)]);
+            }
+            // top
+            if (h+1 < (data.size / data.width)){
+                m = max(m, data.content[(w) * data.width + (h+1)]);
+            }
+            // bottom left
+            if (h-1 > 0 and w-1 > 0){
+                m = max(m, data.content[(w-1) * data.width + (h-1)]);
+            }
+            // bottom right
+            if (w+1 < data.width and h-1 > 0){
+                m = max(m, data.content[(w+1) * data.width + (h-1)]);
+            }
+            // top left
+            if (h+1 < (data.size / data.width) and w-1 > 0){
+                m = max(m, data.content[(w-1) * data.width + (h+1)]);
+            }
+            // top right
+            if (h+1 < (data.size / data.width) and w+1 < data.width){
+                m = max(m, data.content[(w+1) * data.width + (h+1)]);
+            }
+            // set the value
+            res.content[w * data.width + h] = m;
+            m = 0;
+
+        }
+    }
+
+}
+
+void applyMinTransfoInSIM(const RAW file, const RAW res){
 
 
 }
 
-void applyMaxTransfoInC(const RAW data, const unsigned char threshold){
-
-
-}
-
-void applyMinTransfoInSIM(const RAW file, const unsigned char threshold){
-
-
-}
-
-void applyMaxTransfoInSIM(const RAW file, const unsigned char threshold){
+void applyMaxTransfoInSIM(const RAW file, const RAW res){
 
 
 }
@@ -95,33 +181,39 @@ int main() {
     const char outpathMinASM[] = "test_min_simd.raw";
     const char outpathMaxASM[] = "test_max_simd.raw";
 
-    // image threshold for black OR white
-    const unsigned char threshold = 54;
-
-
     int errorCode; // error
+
+    RAW dataOut;
 
     // ---- C  min ----
 
     // data struct, we assign memory
     RAW rawMinDataC;
 
+
     // IN
-    errorCode = loadFile(inpath, rawMinDataC);
+    errorCode = loadFile(inpath, rawMinDataC, 1024);
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
+    dataOut.content = (unsigned char*)malloc(rawMinDataC.size);
+    dataOut.size = rawMinDataC.size;
+
     start_time = clock ();
-    applyMinTransfoInC(rawMinDataC,threshold);
+    applyMinTransfoInC(rawMinDataC,dataOut);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
     printf("Time needed in C (min) : %.6f \n", dt);
 
     // OUT
-    errorCode = writeFile(outpathMinC, rawMinDataC);
+    errorCode = writeFile(outpathMinC, dataOut);
     if (errorCode != 1) // failure
         return 1; // leave on failure
+
+
+    // we free memory back
+    free(rawMinDataC.content);
 
 
     // ---- C  max ----
@@ -130,33 +222,35 @@ int main() {
     RAW rawDataMaxC;
 
     // IN
-    errorCode = loadFile(inpath, rawDataMaxC);
+    errorCode = loadFile(inpath, rawDataMaxC, 1024);
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMaxTransfoInC(rawDataMaxC,threshold);
+    applyMaxTransfoInC(rawDataMaxC,dataOut);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
     printf("Time needed in C (max) : %.6f \n", dt);
 
     // OUT
-    errorCode = writeFile(outpathMaxC, rawDataMaxC);
+    errorCode = writeFile(outpathMaxC, dataOut);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
+
+    free(rawDataMaxC.content);
     // ---- ASM min ----
 
 
     RAW rawMinDataASM;
     // IN
-    errorCode = loadFile(inpath, rawMinDataASM);
+    errorCode = loadFile(inpath, rawMinDataASM, 1024);
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMinTransfoInC(rawMinDataASM,threshold);
+    applyMinTransfoInC(rawMinDataASM, dataOut);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
@@ -164,22 +258,22 @@ int main() {
 
 
     // OUT
-    errorCode = writeFile(outpathMinASM, rawMinDataASM);
+    errorCode = writeFile(outpathMinASM, dataOut);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
-
+    free(rawMinDataASM.content);
     // ---- ASM max ----
 
 
     RAW rawMaxDataASM;
     // IN
-    errorCode = loadFile(inpath, rawMaxDataASM);
+    errorCode = loadFile(inpath, rawMaxDataASM, 1024);
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMaxTransfoInC(rawMaxDataASM,threshold);
+    applyMaxTransfoInC(rawMaxDataASM, dataOut);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
@@ -187,10 +281,12 @@ int main() {
 
 
     // OUT
-    errorCode = writeFile(outpathMaxASM, rawMaxDataASM);
+    errorCode = writeFile(outpathMaxASM, dataOut);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
+    free(rawMaxDataASM.content);
+    free(dataOut.content);
 
     return 0;
 }
