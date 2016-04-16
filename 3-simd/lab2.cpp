@@ -59,12 +59,22 @@ int writeFile(const char * path, const RAW rawData){
 
 
 
-void applyTransfoInC(const RAW data, const unsigned char threshold){
+void applyMinTransfoInC(const RAW data, const unsigned char threshold){
 
 
 }
 
-void applyTransfoInSIM(const RAW file, const unsigned char threshold){
+void applyMaxTransfoInC(const RAW data, const unsigned char threshold){
+
+
+}
+
+void applyMinTransfoInSIM(const RAW file, const unsigned char threshold){
+
+
+}
+
+void applyMaxTransfoInSIM(const RAW file, const unsigned char threshold){
 
 
 }
@@ -80,8 +90,10 @@ int main() {
 
     // file path
     const char inpath[] = "test.raw";
-    const char outpathC[] = "test_minmax_c.raw";
-    const char outpathASM[] = "test_minmax_simd.raw";
+    const char outpathMinC[] = "test_min_c.raw";
+    const char outpathMaxC[] = "test_max_c.raw";
+    const char outpathMinASM[] = "test_min_simd.raw";
+    const char outpathMaxASM[] = "test_max_simd.raw";
 
     // image threshold for black OR white
     const unsigned char threshold = 54;
@@ -89,51 +101,95 @@ int main() {
 
     int errorCode; // error
 
-    // ---- C ----
+    // ---- C  min ----
 
     // data struct, we assign memory
-    RAW rawDataC;
+    RAW rawMinDataC;
 
     // IN
-    errorCode = loadFile(inpath, rawDataC);
+    errorCode = loadFile(inpath, rawMinDataC);
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
     start_time = clock ();
-    applyTransfoInC(rawDataC,threshold);
+    applyMinTransfoInC(rawMinDataC,threshold);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
-    printf("Time needed in C : %.6f \n", dt);
+    printf("Time needed in C (min) : %.6f \n", dt);
 
     // OUT
-    errorCode = writeFile(outpathC, rawDataC);
+    errorCode = writeFile(outpathMinC, rawMinDataC);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
 
-    // ---- ASM ----
+    // ---- C  max ----
 
+    // data struct, we assign memory
+    RAW rawDataMaxC;
 
-    RAW rawDataASM;
     // IN
-    errorCode = loadFile(inpath, rawDataASM);
+    errorCode = loadFile(inpath, rawDataMaxC);
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
     start_time = clock ();
-    applyTransfoInC(rawDataASM,threshold);
+    applyMaxTransfoInC(rawDataMaxC,threshold);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
-    printf("Time needed in SIMD : %.6f \n", dt);
-
+    printf("Time needed in C (max) : %.6f \n", dt);
 
     // OUT
-    errorCode = writeFile(outpathASM, rawDataASM);
+    errorCode = writeFile(outpathMaxC, rawDataMaxC);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
+    // ---- ASM min ----
+
+
+    RAW rawMinDataASM;
+    // IN
+    errorCode = loadFile(inpath, rawMinDataASM);
+    if (errorCode != 1)  // failure
+        return 1; // leave on failure
+
+    start_time = clock ();
+    applyMinTransfoInC(rawMinDataASM,threshold);
+    end_time = clock ();
+    dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
+
+    printf("Time needed in SIMD (min) : %.6f \n", dt);
+
+
+    // OUT
+    errorCode = writeFile(outpathMinASM, rawMinDataASM);
+    if (errorCode != 1) // failure
+        return 1; // leave on failure
+
+
+    // ---- ASM max ----
+
+
+    RAW rawMaxDataASM;
+    // IN
+    errorCode = loadFile(inpath, rawMaxDataASM);
+    if (errorCode != 1)  // failure
+        return 1; // leave on failure
+
+    start_time = clock ();
+    applyMaxTransfoInC(rawMaxDataASM,threshold);
+    end_time = clock ();
+    dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
+
+    printf("Time needed in SIMD (max) : %.6f \n", dt);
+
+
+    // OUT
+    errorCode = writeFile(outpathMaxASM, rawMaxDataASM);
+    if (errorCode != 1) // failure
+        return 1; // leave on failure
 
 
     return 0;
