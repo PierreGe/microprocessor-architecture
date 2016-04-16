@@ -26,3 +26,10 @@ lab3: lab3-build
 
 lab3-build:
 	gcc -m32 -o lab3-release lab3.cpp
+
+
+clean:
+	rm -r lab1-debug.dSYM
+	rm *-debug
+	rm *-release
+	rm test_*.raw
