@@ -86,32 +86,32 @@ void applyTransfoInSIM(const RAW file, const unsigned char threshold){
     unsigned char * _ptr = &file.content[0];
 
     __asm__ (
-            "mov %%ebx,%1\n\t;" //comp
-            "movdqu %%xmm1,(%%ebx)\n\t;"
-            "mov %%ebx,%2\n\t;" // read sign
-            "movdqu %%xmm2,(%%ebx)\n\t;"
+            "mov %%esi,%1\n\t;" //comp
+            "movdqu %%xmm1,(%%esi)\n\t;"
+            "mov %%esi,%2\n\t;" // read sign
+            "movdqu %%xmm2,(%%esi)\n\t;"
             "paddb %%xmm1,%%xmm2\n\t;"
             "mov %%ecx,%3\n\t;" //l
-            "mov %%ebx,%4\n\t;" // ptr
+            "mov %%esi,%4\n\t;" // ptr
 
-            "loop:"
-                "movdqu %%xmm0,(%%ebx)\n\t;"
-                "paddb %%xmm0,%%xmm2\n\t;" // Add Packed Integers
-                "pcmpgtb %%xmm0,%%xmm1\n\t;" // Compare Packed Signed Integers for Greater Than
-                "movdqu (%%ebx),%%xmm0\n\t;"
-                "add %%ebx,16\n\t;"
-                "sub %%ecx,1\n\t;"
-                "jnz loop\n\t;"
+             "label1:"
+                    "movdqu %%xmm0,(%%esi)\n\t;"
+                    //"paddb %%xmm0,%%xmm2\n\t;" // Add Packed Integers
+                    //"pcmpgtb %%xmm0,%%xmm1\n\t;" // Compare Packed Signed Integers for Greater Than
+                    //"movdqu (%%esi),%%xmm0\n\t;"
+                    "add $16, %%esi\n\t;"
+                    "sub $1, %%ecx\n\t;"
+                    "jnz label1\n\t;"
 
             "emms\n\t;" //clean
 
-            : "=r" (sign)  /* output operands */
-            : "r" (comp), "r" (sign), "g" (l), "m" (_ptr) /* input operands */
-            : "%ebx",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
+            : "=r" (_sign)  /* output operands */
+            : "m" (_comp), "r" (_sign), "g" (l), "m" (_ptr) /* input operands */
+            : "%esi",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
     );
 
     for (size_t i = 0; i < file.size % 16; ++i){
-        file.content[i] = file.content[i] > threshold ? 255 : 0;
+        //file.content[i] = file.content[i] > threshold ? 255 : 0;
     }
 
 }
@@ -169,7 +169,7 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyTransfoInC(rawDataASM,threshold);
+    applyTransfoInSIM(rawDataASM,threshold);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
