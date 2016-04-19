@@ -86,32 +86,37 @@ void applyTransfoInSIM(const RAW file, const unsigned char threshold){
     unsigned char * _ptr = &file.content[0];
 
     __asm__ (
-            "mov %%esi,%1\n\t;" //comp
+            "movl %1, %%esi\n\t;" //comp
             "movdqu %%xmm1,(%%esi)\n\t;"
-            "mov %%esi,%2\n\t;" // read sign
+            "movl %2, %%esi\n\t;" // read sign
             "movdqu %%xmm2,(%%esi)\n\t;"
             "paddb %%xmm1,%%xmm2\n\t;"
-            "mov %%ecx,%3\n\t;" //l
-            "mov %%esi,%4\n\t;" // ptr
-
+            "movl %3, %%ecx\n\t;" //l
+            "mov %4, %%esi\n\t;" // ptr
              "label1:"
+                    "movdqu (%%esi),%%xmm0\n\t;"
+
+                    "paddb %%xmm0,%%xmm2\n\t;"
+
+                    "pcmpgtb %%xmm1,%%xmm0\n\t;"
+
+
                     "movdqu %%xmm0,(%%esi)\n\t;"
                     //"paddb %%xmm0,%%xmm2\n\t;" // Add Packed Integers
                     //"pcmpgtb %%xmm0,%%xmm1\n\t;" // Compare Packed Signed Integers for Greater Than
-                    //"movdqu (%%esi),%%xmm0\n\t;"
-                    "add $16, %%esi\n\t;"
-                    "sub $1, %%ecx\n\t;"
-                    "jnz label1\n\t;"
 
+                    "addl $16, %%esi\n\t;"
+                    "subl $1, %%ecx\n\t;"
+                    "jnz label1\n\t;"
             "emms\n\t;" //clean
 
-            : "=r" (_sign)  /* output operands */
+            : "=m" (_ptr)/* output operands */
             : "m" (_comp), "r" (_sign), "g" (l), "m" (_ptr) /* input operands */
             : "%esi",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
-    );
+   );
 
     for (size_t i = 0; i < file.size % 16; ++i){
-        //file.content[i] = file.content[i] > threshold ? 255 : 0;
+        file.content[i] = file.content[i] > threshold ? 255 : 0;
     }
 
 }
