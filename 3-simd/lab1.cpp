@@ -87,9 +87,9 @@ void applyTransfoInSIM(const RAW file, const unsigned char threshold){
 
     __asm__ (
             "movl %1, %%esi\n\t;" //comp
-            "movdqu %%xmm1,(%%esi)\n\t;"
+            "movdqu (%%esi),%%xmm1\n\t;"
             "movl %2, %%esi\n\t;" // read sign
-            "movdqu %%xmm2,(%%esi)\n\t;"
+            "movdqu (%%esi), %%xmm2\n\t;"
             "paddb %%xmm1,%%xmm2\n\t;"
             "movl %3, %%ecx\n\t;" //l
             "mov %4, %%esi\n\t;" // ptr
@@ -98,10 +98,10 @@ void applyTransfoInSIM(const RAW file, const unsigned char threshold){
 
                     "paddb %%xmm0,%%xmm2\n\t;"
 
-                    "pcmpgtb %%xmm1,%%xmm0\n\t;"
+                    "pcmpgtb %%xmm0,%%xmm1\n\t;"
 
 
-                    "movdqu %%xmm0,(%%esi)\n\t;"
+                    "movdqu %%xmm1,(%%esi)\n\t;"
                     //"paddb %%xmm0,%%xmm2\n\t;" // Add Packed Integers
                     //"pcmpgtb %%xmm0,%%xmm1\n\t;" // Compare Packed Signed Integers for Greater Than
 
@@ -114,10 +114,6 @@ void applyTransfoInSIM(const RAW file, const unsigned char threshold){
             : "m" (_comp), "r" (_sign), "g" (l), "m" (_ptr) /* input operands */
             : "%esi",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
    );
-
-    for (size_t i = 0; i < file.size % 16; ++i){
-        file.content[i] = file.content[i] > threshold ? 255 : 0;
-    }
 
 }
 
@@ -136,7 +132,7 @@ int main() {
     const char outpathASM[] = "test_threshold_simd.raw";
 
     // image threshold for black OR white
-    const unsigned char threshold = 54;
+    const unsigned char threshold = 128;
 
 
     int errorCode; // error
