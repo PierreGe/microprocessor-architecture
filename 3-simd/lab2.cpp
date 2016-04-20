@@ -156,14 +156,19 @@ void applyMaxTransfoInC(const RAW data, RAW res){
 }
 
 void applyMinTransfoInSIM(const RAW data, RAW res){
+
+
+}
+
+void applyMaxTransfoInSIM(const RAW data, RAW res){
     unsigned char * dataEntryPoint = &data.content[0];
     unsigned char * outputEntryPoint = &res.content[0];
     size_t nbr16Bblocks = data.size / 16;
     __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l1:"
+    "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l1:"
             "movdqu (%%esi),%%xmm0\n\t;"
             "movdqu 1024(%%esi),%%xmm1\n\t;"
             "movdqu 2048(%%esi),%%xmm2\n\t;"
@@ -174,15 +179,10 @@ void applyMinTransfoInSIM(const RAW data, RAW res){
             "add $14,%%edi\n\t;"
             "sub $1,%%ecx\n\t;"
             "jnz l1\n\t;"
-        : "=m" (outputEntryPoint)/* output operands */
-        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-        : "%esi",  "%xmm1", "%xmm2", "%ecx", "%edi", "%xmm0"/* clobbered operands */
+    : "=m" (outputEntryPoint)/* output operands */
+    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+    : "%esi",  "%xmm1", "%xmm2", "%ecx", "%edi", "%xmm0"/* clobbered operands */
     );
-
-}
-
-void applyMaxTransfoInSIM(const RAW data, RAW res){
-
 
 }
 
@@ -204,7 +204,7 @@ int main() {
 
     int errorCode; // error
 
-    RAW dataOut;
+    RAW dataOutC;
 
     // ---- C  min ----
 
@@ -217,18 +217,18 @@ int main() {
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
-    dataOut.content = (unsigned char*)malloc(rawMinDataC.size);
-    dataOut.size = rawMinDataC.size;
+    dataOutC.content = (unsigned char*)malloc(rawMinDataC.size);
+    dataOutC.size = rawMinDataC.size;
 
     start_time = clock ();
-    applyMinTransfoInC(rawMinDataC,dataOut);
+    applyMinTransfoInC(rawMinDataC,dataOutC);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
     printf("Time needed in C (min) : %.6f \n", dt);
 
     // OUT
-    errorCode = writeFile(outpathMinC, dataOut);
+    errorCode = writeFile(outpathMinC, dataOutC);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
@@ -248,20 +248,25 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMaxTransfoInC(rawDataMaxC,dataOut);
+    applyMaxTransfoInC(rawDataMaxC,dataOutC);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
     printf("Time needed in C (max) : %.6f \n", dt);
 
     // OUT
-    errorCode = writeFile(outpathMaxC, dataOut);
+    errorCode = writeFile(outpathMaxC, dataOutC);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
 
     free(rawDataMaxC.content);
+    free(dataOutC.content);
     // ---- ASM min ----
+
+    RAW dataOutSIMD;
+    dataOutSIMD.content = (unsigned char*)malloc(rawMinDataC.size);
+    dataOutSIMD.size = rawMinDataC.size;
 
 
     RAW rawMinDataASM;
@@ -271,7 +276,7 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMinTransfoInC(rawMinDataASM, dataOut);
+    applyMinTransfoInSIM(rawMinDataASM, dataOutSIMD);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
@@ -279,7 +284,7 @@ int main() {
 
 
     // OUT
-    errorCode = writeFile(outpathMinASM, dataOut);
+    errorCode = writeFile(outpathMinASM, dataOutSIMD);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
@@ -294,7 +299,7 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMaxTransfoInC(rawMaxDataASM, dataOut);
+    applyMaxTransfoInSIM(rawMaxDataASM, dataOutSIMD);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
@@ -302,12 +307,12 @@ int main() {
 
 
     // OUT
-    errorCode = writeFile(outpathMaxASM, dataOut);
+    errorCode = writeFile(outpathMaxASM, dataOutSIMD);
     if (errorCode != 1) // failure
         return 1; // leave on failure
 
     free(rawMaxDataASM.content);
-    free(dataOut.content);
+    free(dataOutSIMD.content);
 
     return 0;
 }
