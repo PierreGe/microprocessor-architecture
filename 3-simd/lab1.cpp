@@ -76,7 +76,7 @@ void applyTransfoInSIM(const RAW data, const unsigned char threshold){
     // preprocess for ASM
     unsigned char compare[16];
     for (size_t i = 0; i < 16; ++i){
-        compare[i] = threshold-1;
+        compare[i] = threshold+127;
     }
     size_t nbr16Bblocks = data.size / 16;
     uint64_t add128[2];
@@ -96,7 +96,7 @@ void applyTransfoInSIM(const RAW data, const unsigned char threshold){
             "movdqu (%%esi),%%xmm1\n\t;"
             "movl %2, %%esi\n\t;" // read sign
             "movdqu (%%esi), %%xmm2\n\t;"
-            "paddb %%xmm2,%%xmm1\n\t;"
+            // "paddb %%xmm2,%%xmm1\n\t;"
             "movl %3, %%ecx\n\t;" //l
             "mov %4, %%esi\n\t;" // ptr
             "label1:"
