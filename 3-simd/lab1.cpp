@@ -89,6 +89,8 @@ void applyTransfoInSIM(const RAW data, const unsigned char threshold){
     unsigned char* compareEntryPoint = &compare[0];
     unsigned char * dataEntryPoint = &data.content[0];
 
+    // ASM : ATT syntax
+    // GCC compile in 32 bits
     __asm__ (
             "movl %1, %%esi\n\t;" //comp
             "movdqu (%%esi),%%xmm1\n\t;"
