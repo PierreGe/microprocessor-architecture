@@ -182,6 +182,7 @@ void applyMinTransfoInSIM(const RAW data, RAW res){
             "add $14,%%edi\n\t;"
             "sub $1,%%ecx\n\t;"
             "jnz l2\n\t;"
+    "emms\n\t;" //clean
     : "=m" (outputEntryPoint)/* output operands */
     : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
     : "%esi",  "%xmm1", "%xmm2", "%ecx", "%edi", "%xmm0"/* clobbered operands */
