@@ -156,7 +156,36 @@ void applyMaxTransfoInC(const RAW data, RAW res){
 }
 
 void applyMinTransfoInSIM(const RAW data, RAW res){
+    unsigned char * dataEntryPoint = &data.content[0];
+    unsigned char * outputEntryPoint = &res.content[0];
+    size_t nbr16Bblocks = data.size / 16;
+    __asm__ (
+        "movl %2,%%esi\n\t;"
+        "movl %1,%%ecx\n\t;"
+        "movl %0,%%edi\n\t;"
+        "l2:"
+            "movdqu (%%esi),%%xmm0\n\t;"
+            "movdqu 1024(%%esi),%%xmm1\n\t;"
+            "movdqu 2048(%%esi),%%xmm2\n\t;"
 
+            "pminub %%xmm1,%%xmm0\n\t;"
+            "pminub %%xmm2,%%xmm0\n\t;"
+            "movdqu %%xmm0,%%xmm6\n\t;"
+            "movdqu %%xmm0,%%xmm7\n\t;"
+            "psrldq $1,%%xmm6\n\t;"
+            "psrldq $2,%%xmm7\n\t;"
+            "pminub %%xmm7,%%xmm6\n\t;"
+            "pminub %%xmm0,%%xmm6\n\t;"
+
+            "movdqu %%xmm0,(%%edi)\n\t;"
+            "add $14,%%esi\n\t;"
+            "add $14,%%edi\n\t;"
+            "sub $1,%%ecx\n\t;"
+            "jnz l2\n\t;"
+    : "=m" (outputEntryPoint)/* output operands */
+    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+    : "%esi",  "%xmm1", "%xmm2", "%ecx", "%edi", "%xmm0"/* clobbered operands */
+    );
 
 }
 
@@ -165,14 +194,22 @@ void applyMaxTransfoInSIM(const RAW data, RAW res){
     unsigned char * outputEntryPoint = &res.content[0];
     size_t nbr16Bblocks = data.size / 16;
     __asm__ (
-    "movl %2,%%esi\n\t;"
-            "movl %1,%%ecx\n\t;"
-            "movl %0,%%edi\n\t;"
-            "l1:"
+        "movl %2,%%esi\n\t;"
+        "movl %1,%%ecx\n\t;"
+        "movl %0,%%edi\n\t;"
+        "l1:"
             "movdqu (%%esi),%%xmm0\n\t;"
             "movdqu 1024(%%esi),%%xmm1\n\t;"
             "movdqu 2048(%%esi),%%xmm2\n\t;"
 
+            "pmaxub %%xmm1,%%xmm0\n\t;"
+            "pmaxub %%xmm2,%%xmm0\n\t;"
+            "movdqu %%xmm0,%%xmm6\n\t;"
+            "movdqu %%xmm0,%%xmm7\n\t;"
+            "psrldq $1,%%xmm6\n\t;"
+            "psrldq $2,%%xmm7\n\t;"
+            "pmaxub %%xmm7,%%xmm6\n\t;"
+            "pmaxub %%xmm0,%%xmm6\n\t;"
 
             "movdqu %%xmm0,(%%edi)\n\t;"
             "add $14,%%esi\n\t;"
