@@ -96,7 +96,6 @@ void applyTransfoInSIM(const RAW data, const unsigned char threshold){
             "movdqu (%%esi),%%xmm1\n\t;"
             "movl %2, %%esi\n\t;" // read sign
             "movdqu (%%esi), %%xmm2\n\t;"
-            // "paddb %%xmm2,%%xmm1\n\t;"
             "movl %3, %%ecx\n\t;" //l
             "mov %4, %%esi\n\t;" // ptr
             "label1:"
