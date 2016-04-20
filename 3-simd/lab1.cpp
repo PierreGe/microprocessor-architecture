@@ -71,19 +71,23 @@ void applyTransfoInC(const RAW data, const unsigned char threshold){
 
 }
 
-void applyTransfoInSIM(const RAW file, const unsigned char threshold){
-    unsigned char comp[16];
-    for (size_t i = 0; i < 16; ++i)
-        comp[i] = threshold-1;
-    unsigned char* _comp = &comp[0];
+void applyTransfoInSIM(const RAW data, const unsigned char threshold){
 
-    uint64_t sign[2];
-    sign[0] = 0x8080808080808080;
-    sign[1] = 0x8080808080808080;
-    uint64_t* _sign = &sign[0];
+    // preprocess for ASM
+    unsigned char compare[16];
+    for (size_t i = 0; i < 16; ++i){
+        compare[i] = threshold-1;
+    }
+    size_t nbr16Bblocks = data.size / 16;
+    uint64_t add128[2];
+    add128[0] = 0x8080808080808080;
+    add128[1] = 0x8080808080808080;
 
-    size_t l = file.size / 16;
-    unsigned char * _ptr = &file.content[0];
+
+    // define entry point to pass to ASM
+    uint64_t* add128entrypoint = &add128[0];
+    unsigned char* compareEntryPoint = &compare[0];
+    unsigned char * dataEntryPoint = &data.content[0];
 
     __asm__ (
             "movl %1, %%esi\n\t;" //comp
@@ -109,8 +113,8 @@ void applyTransfoInSIM(const RAW file, const unsigned char threshold){
                     "jnz label1\n\t;"
             "emms\n\t;" //clean
 
-            : "=m" (_ptr)/* output operands */
-            : "m" (_comp), "r" (_sign), "g" (l), "m" (_ptr) /* input operands */
+            : "=m" (dataEntryPoint)/* output operands */
+            : "m" (compareEntryPoint), "r" (add128entrypoint), "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
             : "%esi",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
    );
 
