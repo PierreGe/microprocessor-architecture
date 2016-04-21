@@ -185,7 +185,7 @@ void applyMinTransfoInSIM(const RAW data, RAW res){
     "emms\n\t;" //clean
     : "=m" (outputEntryPoint)/* output operands */
     : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%xmm1", "%xmm2", "%ecx", "%edi", "%xmm0"/* clobbered operands */
+    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2", "%xmm6", "%xmm7"/* clobbered operands */
     );
 
 }
@@ -219,7 +219,7 @@ void applyMaxTransfoInSIM(const RAW data, RAW res){
             "jnz l1\n\t;"
     : "=m" (outputEntryPoint)/* output operands */
     : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%xmm1", "%xmm2", "%ecx", "%edi", "%xmm0"/* clobbered operands */
+    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2", "%xmm6", "%xmm7"/* clobbered operands */
     );
 
 }
