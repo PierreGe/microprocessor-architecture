@@ -157,7 +157,7 @@ void *threadFuncThresSIMD(void *arg){
     // define entry point to pass to ASM
     uint64_t* add128entrypoint = &add128[0];
     unsigned char* compareEntryPoint = &compare[0];
-    unsigned char * dataEntryPoint = &(dt->content->content[0]);
+    unsigned char * dataEntryPoint = &(dt->content->content[0]) + dt->begin * sizeof(unsigned char);
     // ASM : ATT syntax
     // GCC compile in 32 bits
     __asm__ (
