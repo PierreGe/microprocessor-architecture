@@ -9,7 +9,7 @@
 // Pierre Gerard, Julian Schrembri, Francois Schiltz
 
 
-#define NUMBER_OF_THREAD 2
+#define NUMBER_OF_THREAD 4
 
 
 // Struct that contains the data
@@ -101,10 +101,6 @@ void applyTransfoInCMulti(RAW data, const unsigned char threshold){
         /* wait for our thread to finish before continuing */
         pthread_join(pth, NULL);
     }
-
-
-
-
 }
 
 
@@ -146,8 +142,60 @@ void applyTransfoInSIM(const RAW data, const unsigned char threshold){
     );
 }
 
-void applyTransfoInSIMMulti(const RAW data, const unsigned char threshold){
+void *threadFuncThresSIMD(void *arg){
+    ThresoldThreadData *dt;
+    dt=(ThresoldThreadData*)arg;
+    // preprocess for ASM
+    unsigned char compare[16];
+    for (size_t i = 0; i < 16; ++i){
+        compare[i] = dt->thresold +127;
+    }
+    size_t nbr16Bblocks = (dt->end - dt->begin) / 16;
+    uint64_t add128[2];
+    add128[0] = 0x8080808080808080;
+    add128[1] = 0x8080808080808080;
+    // define entry point to pass to ASM
+    uint64_t* add128entrypoint = &add128[0];
+    unsigned char* compareEntryPoint = &compare[0];
+    unsigned char * dataEntryPoint = &(dt->content->content[0]);
+    // ASM : ATT syntax
+    // GCC compile in 32 bits
+    __asm__ (
+    "movl %1, %%esi\n\t;" //comp
+            "movdqu (%%esi),%%xmm1\n\t;"
+            "movl %2, %%esi\n\t;" // read sign
+            "movdqu (%%esi), %%xmm2\n\t;"
+            "movl %3, %%ecx\n\t;" //l
+            "mov %4, %%esi\n\t;" // ptr
+            "label3:"
+            "movdqu (%%esi),%%xmm0\n\t;"
+            "paddb %%xmm2,%%xmm0\n\t;"
+            "pcmpgtb %%xmm1,%%xmm0\n\t;"
+            "movdqu %%xmm0,(%%esi)\n\t;"
+            "addl $16, %%esi\n\t;"
+            "subl $1, %%ecx\n\t;"
+            "jnz label3\n\t;"
+            "emms\n\t;" //clean
+    : "=m" (dataEntryPoint)/* output operands */
+    : "m" (compareEntryPoint), "r" (add128entrypoint), "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+    : "%esi",  "%xmm1", "%xmm2", "%ecx", "%xmm0"/* clobbered operands */
+    );
+}
 
+void applyTransfoInSIMMulti( RAW data, const unsigned char threshold){
+    for (int i = 0; i < NUMBER_OF_THREAD; ++i) {
+        ThresoldThreadData *threadData = NULL;
+        threadData = (struct ThresoldThreadData*)malloc(sizeof(struct ThresoldThreadData));
+        (*threadData).content = &data;
+        (*threadData).thresold = threshold;
+        (*threadData).begin = i * (data.size/NUMBER_OF_THREAD);
+        (*threadData).end = (i+1) * (data.size/NUMBER_OF_THREAD);
+        pthread_t pth;
+        /* Create worker thread */
+        pthread_create(&pth,NULL,threadFuncThresSIMD,(void*)threadData);
+        /* wait for our thread to finish before continuing */
+        pthread_join(pth, NULL);
+    }
 }
 
 
@@ -223,7 +271,7 @@ int mainThresold() {
     applyTransfoInSIMMulti(rawDataASMMulti,threshold);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
-    printf("Time needed in SIMD (mono-thread): %.6f \n", dt);
+    printf("Time needed in SIMD (multi-thread): %.6f \n", dt);
     // OUT
     errorCode = writeFile(outpathMultiASM, rawDataASMMulti);
     if (errorCode != 1) // failure
