@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdint.h>
 
 // Pierre Gerard, Julian Schrembri, Francois Schiltz
 
@@ -61,54 +62,25 @@ int writeFile(const char * path, const RAW rawData){
 
 
 
-void applyMinTransfoInC(const RAW data, RAW res){
-
+void applyMinTransfoInC(const RAW data, RAW res, int width=3){
     unsigned int m = 255;
     for (size_t w = 0; w < data.width ; ++w) {
         for (size_t h = 0; h < (data.size / data.width); ++h) {
-            // center
-            m = min(m, data.content[w * data.width + h]);
-            // left
-            if (w-1 > 0){
-                m = min(m, data.content[(w-1) * data.width + (h)]);
-            }
-            // right
-            if (w+1 < data.width){
-                m = min(m, data.content[(w+1) * data.width + (h)]);
-            }
-            // bottom
-            if (h-1 > 0){
-                m = min(m, data.content[(w) * data.width + (h-1)]);
-            }
-            // top
-            if (h+1 < (data.size / data.width)){
-                m = min(m, data.content[(w) * data.width + (h+1)]);
-            }
-            // bottom left
-            if (h-1 > 0 and w-1 > 0){
-                m = min(m, data.content[(w-1) * data.width + (h-1)]);
-            }
-            // bottom right
-            if (w+1 < data.width and h-1 > 0){
-                m = min(m, data.content[(w+1) * data.width + (h-1)]);
-            }
-            // top left
-            if (h+1 < (data.size / data.width) and w-1 > 0){
-                m = min(m, data.content[(w-1) * data.width + (h+1)]);
-            }
-            // top right
-            if (h+1 < (data.size / data.width) and w+1 < data.width){
-                m = min(m, data.content[(w+1) * data.width + (h+1)]);
+            int t = -(width/2);
+            for(int i = 0; i < width; ++i){
+                for(int j = 0; j < width; ++j)
+                {
+                   m = min(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
+                } 
             }
             // set the value
             res.content[w * data.width + h] = m;
             m = 255;
-
         }
     }
 }
 
-void applyMaxTransfoInC(const RAW data, RAW res){
+void applyMaxTransfoInC(const RAW data, RAW res, int width=3){
     unsigned int m = 0;
     for (size_t w = 0; w < data.width ; ++w) {
         for (size_t h = 0; h < (data.size / data.width); ++h) {
