@@ -197,6 +197,8 @@ inline void applyMinTransfoInSIMby7(const RAW data, RAW res){
             "pminub %%xmm2,%%xmm0\n\t;"
             "pminub %%xmm3,%%xmm0\n\t;"
             "pminub %%xmm4,%%xmm0\n\t;"
+            "pminub %%xmm5,%%xmm0\n\t;"
+            "pminub %%xmm6,%%xmm0\n\t;"
             
             "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
             "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
@@ -319,10 +321,13 @@ inline void applyMaxTransfoInSIMby7(const RAW data, RAW res){
             "movdqu 5120(%%esi),%%xmm5\n\t;"
             "movdqu 6144(%%esi),%%xmm6\n\t;"
             
+
             "pmaxub %%xmm1,%%xmm0\n\t;"
             "pmaxub %%xmm2,%%xmm0\n\t;"
             "pmaxub %%xmm3,%%xmm0\n\t;"
             "pmaxub %%xmm4,%%xmm0\n\t;"
+            "pmaxub %%xmm5,%%xmm0\n\t;"
+            "pmaxub %%xmm6,%%xmm0\n\t;"
             
             "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
             "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
