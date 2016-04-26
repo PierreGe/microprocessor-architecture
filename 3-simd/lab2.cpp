@@ -70,7 +70,7 @@ void applyMinTransfoInC(const RAW data, RAW res, int width){
             for(int i = 0; i < width; ++i){
                 for(int j = 0; j < width; ++j)
                 {
-                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) <= data.size)
+                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) < data.size)
                         m = min(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
                 } 
             }
@@ -89,7 +89,7 @@ void applyMaxTransfoInC(const RAW data, RAW res, int width){
             for(int i = 0; i < width; ++i){
                 for(int j = 0; j < width; ++j)
                 {
-                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) <= data.size)
+                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) < data.size)
                         m = max(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
                 } 
             }
@@ -100,7 +100,7 @@ void applyMaxTransfoInC(const RAW data, RAW res, int width){
 void applyMinTransfoInSIM(const RAW data, RAW res){
     unsigned char * dataEntryPoint = &data.content[0];
     unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 16;
+    size_t nbr16Bblocks = data.size / 14;
 
     __asm__ (
         "movl %2,%%esi\n\t;"
@@ -113,14 +113,13 @@ void applyMinTransfoInSIM(const RAW data, RAW res){
 
             "pminub %%xmm1,%%xmm0\n\t;"
             "pminub %%xmm2,%%xmm0\n\t;"
-            "movdqu %%xmm0,%%xmm6\n\t;"
-            "movdqu %%xmm0,%%xmm7\n\t;"
-            "psrldq $1,%%xmm6\n\t;"
-            "psrldq $2,%%xmm7\n\t;"
+ 
+            "vpsrldq $1,%%xmm0,%%xmm6\n\t;"
+            "vpsrldq $2,%%xmm0,%%xmm7\n\t;"
             "pminub %%xmm7,%%xmm6\n\t;"
             "pminub %%xmm0,%%xmm6\n\t;"
 
-            "movdqu %%xmm0,(%%edi)\n\t;"
+            "movdqu %%xmm6,(%%edi)\n\t;"
             "add $14,%%esi\n\t;"
             "add $14,%%edi\n\t;"
             "sub $1,%%ecx\n\t;"
@@ -136,7 +135,7 @@ void applyMinTransfoInSIM(const RAW data, RAW res){
 void applyMinTransfoInSIMby5(const RAW data, RAW res){
     unsigned char * dataEntryPoint = &data.content[0];
     unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 16;
+    size_t nbr16Bblocks = data.size / 12;
     __asm__ (
         "movl %2,%%esi\n\t;"
         "movl %1,%%ecx\n\t;"
@@ -169,9 +168,9 @@ void applyMinTransfoInSIMby5(const RAW data, RAW res){
             "pminub %%xmm7,%%xmm4\n\t;"
             "pminub %%xmm0,%%xmm4\n\t;"
 
-            "movdqu %%xmm0,(%%edi)\n\t;"
-            "add $14,%%esi\n\t;"
-            "add $14,%%edi\n\t;"
+            "movdqu %%xmm4,(%%edi)\n\t;"
+            "add $12,%%esi\n\t;"
+            "add $12,%%edi\n\t;"
             "sub $1,%%ecx\n\t;"
             "jnz l3\n\t;"
         "emms\n\t;" //clean
@@ -223,7 +222,7 @@ int main() {
     // time var
     time_t start_time, end_time ;
     float dt ;
-    unsigned int box = 3;
+    unsigned int box = 5;
     // file path
     const char inpath[] = "test.raw";
     const char outpathMinC[] = "test_min_c.raw";
@@ -249,7 +248,7 @@ int main() {
     dataOutC.content = (unsigned char*)malloc(rawMinDataC.size);
     dataOutC.size = rawMinDataC.size;
 
-    /*
+    //*
     dataOutC.width = rawMinDataC.width;
     RAW temp;
     temp.content = (unsigned char*)malloc(rawMinDataC.size);
@@ -262,7 +261,7 @@ int main() {
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
     
     /*
-     for(int i = 0; i < 50; i++){
+     for(int i = 0; i < 5; i++){
         applyMinTransfoInC(dataOutC,temp,box);
         for(int j = 0; j < temp.size; j++){
            dataOutC.content[j] = temp.content[j]; 
@@ -313,7 +312,7 @@ int main() {
     dataOutSIMD.content = (unsigned char*)malloc(rawMinDataC.size);
     dataOutSIMD.size = rawMinDataC.size;
     
-    /*
+    //*
     dataOutSIMD.width = rawMinDataC.width;
 
     temp.content = (unsigned char*)malloc(rawMinDataC.size);
@@ -339,7 +338,7 @@ int main() {
         dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
         
         /*
-        for(int i = 0; i < 50; i++){
+        for(int i = 0; i < 5; i++){
             applyMinTransfoInSIM(dataOutSIMD,temp);
             for(int j = 0; j < temp.size; j++){
                 dataOutSIMD.content[j] = temp.content[j]; 
