@@ -70,7 +70,8 @@ void applyMinTransfoInC(const RAW data, RAW res, int width=3){
             for(int i = 0; i < width; ++i){
                 for(int j = 0; j < width; ++j)
                 {
-                   m = min(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
+                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) <= data.size)
+                        m = min(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
                 } 
             }
             // set the value
@@ -84,47 +85,16 @@ void applyMaxTransfoInC(const RAW data, RAW res, int width=3){
     unsigned int m = 0;
     for (size_t w = 0; w < data.width ; ++w) {
         for (size_t h = 0; h < (data.size / data.width); ++h) {
-            // center
-            m = max(m, data.content[w * data.width + h]);
-            // left
-            if (w-1 > 0){
-                m = max(m, data.content[(w-1) * data.width + (h)]);
+            int t = -(width/2);
+            for(int i = 0; i < width; ++i){
+                for(int j = 0; j < width; ++j)
+                {
+                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) <= data.size)
+                        m = max(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
+                } 
             }
-            // right
-            if (w+1 < data.width){
-                m = max(m, data.content[(w+1) * data.width + (h)]);
-            }
-            // bottom
-            if (h-1 > 0){
-                m = max(m, data.content[(w) * data.width + (h-1)]);
-            }
-            // top
-            if (h+1 < (data.size / data.width)){
-                m = max(m, data.content[(w) * data.width + (h+1)]);
-            }
-            // bottom left
-            if (h-1 > 0 and w-1 > 0){
-                m = max(m, data.content[(w-1) * data.width + (h-1)]);
-            }
-            // bottom right
-            if (w+1 < data.width and h-1 > 0){
-                m = max(m, data.content[(w+1) * data.width + (h-1)]);
-            }
-            // top left
-            if (h+1 < (data.size / data.width) and w-1 > 0){
-                m = max(m, data.content[(w-1) * data.width + (h+1)]);
-            }
-            // top right
-            if (h+1 < (data.size / data.width) and w+1 < data.width){
-                m = max(m, data.content[(w+1) * data.width + (h+1)]);
-            }
-            // set the value
-            res.content[w * data.width + h] = m;
-            m = 0;
-
         }
     }
-
 }
 
 void applyMinTransfoInSIM(const RAW data, RAW res){
