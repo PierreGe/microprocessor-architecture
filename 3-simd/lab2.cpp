@@ -174,7 +174,7 @@ int main() {
     // time var
     time_t start_time, end_time ;
     float dt ;
-
+    unsigned int box = 3;
     // file path
     const char inpath[] = "test.raw";
     const char outpathMinC[] = "test_min_c.raw";
@@ -201,7 +201,7 @@ int main() {
     dataOutC.size = rawMinDataC.size;
 
     start_time = clock ();
-    applyMinTransfoInC(rawMinDataC,dataOutC);
+    applyMinTransfoInC(rawMinDataC,dataOutC,box);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
@@ -228,7 +228,7 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMaxTransfoInC(rawDataMaxC,dataOutC);
+    applyMaxTransfoInC(rawDataMaxC,dataOutC,box);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
