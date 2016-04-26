@@ -25,7 +25,7 @@ lab3: lab3-build
 	./lab3-release
 
 lab3-build:
-	gcc -m32 -o lab3-release lab3.cpp
+	gcc -m32 -o lab3-release lab3.cpp -lpthread
 
 
 clean:
