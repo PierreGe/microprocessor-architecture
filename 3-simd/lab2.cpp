@@ -99,266 +99,257 @@ inline void applyMaxTransfoInC(const RAW data, RAW res, int width){
 
 inline void applyMinTransfoInSIM(const RAW data, RAW res){
     unsigned char * dataEntryPoint = &data.content[0];
-    unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 14;
+    unsigned char * outputEntryPoint = &res.content[0];  
+    if(box == 5){
+        size_t nbr16Bblocks = data.size / 12;
+        __asm__ (
+            "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l3:"
+                "movdqu (%%esi),%%xmm0\n\t;"
+                "movdqu 1024(%%esi),%%xmm1\n\t;"
+                "movdqu 2048(%%esi),%%xmm2\n\t;"
+                "movdqu 3072(%%esi),%%xmm3\n\t;"
+                "movdqu 4096(%%esi),%%xmm4\n\t;"
+                
 
-    __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l2:"
-            "movdqu (%%esi),%%xmm0\n\t;"
-            "movdqu 1024(%%esi),%%xmm1\n\t;"
-            "movdqu 2048(%%esi),%%xmm2\n\t;"
+                "pminub %%xmm1,%%xmm0\n\t;"
+                "pminub %%xmm2,%%xmm0\n\t;"
+                "pminub %%xmm3,%%xmm0\n\t;"
+                "pminub %%xmm4,%%xmm0\n\t;"
+                
+                "vpsrldq $1,%%xmm0,%%xmm4\n\t;"
+                "vpsrldq $2,%%xmm0,%%xmm5\n\t;"
+                "vpsrldq $3,%%xmm0,%%xmm6\n\t;"
+                "vpsrldq $4,%%xmm0,%%xmm7\n\t;"
+                
+                "pminub %%xmm5,%%xmm4\n\t;"
+                "pminub %%xmm6,%%xmm4\n\t;"
+                "pminub %%xmm7,%%xmm4\n\t;"
+                "pminub %%xmm0,%%xmm4\n\t;"
 
-            "pminub %%xmm1,%%xmm0\n\t;"
-            "pminub %%xmm2,%%xmm0\n\t;"
- 
-            "vpsrldq $1,%%xmm0,%%xmm6\n\t;"
-            "vpsrldq $2,%%xmm0,%%xmm7\n\t;"
-            "pminub %%xmm7,%%xmm6\n\t;"
-            "pminub %%xmm0,%%xmm6\n\t;"
+                "movdqu %%xmm4,(%%edi)\n\t;"
+                "add $12,%%esi\n\t;"
+                "add $12,%%edi\n\t;"
+                "sub $1,%%ecx\n\t;"
+                "jnz l3\n\t;"
+            "emms\n\t;" //clean
+        : "=m" (outputEntryPoint)/* output operands */
+        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+        : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4","%xmm5", "%xmm6", "%xmm7"/* clobbered operands */
+        );
+    }
+    else if(box == 7){
+        size_t nbr16Bblocks = data.size / 10;
+        __asm__ (
+            "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l4:"
+                "movdqu (%%esi),%%xmm0\n\t;"
+                "movdqu 1024(%%esi),%%xmm1\n\t;"
+                "movdqu 2048(%%esi),%%xmm2\n\t;"
+                "movdqu 3072(%%esi),%%xmm3\n\t;"
+                "movdqu 4096(%%esi),%%xmm4\n\t;"
+                "movdqu 5120(%%esi),%%xmm5\n\t;"
+                "movdqu 6144(%%esi),%%xmm6\n\t;"
+                
 
-            "movdqu %%xmm6,(%%edi)\n\t;"
-            "add $14,%%esi\n\t;"
-            "add $14,%%edi\n\t;"
-            "sub $1,%%ecx\n\t;"
-            "jnz l2\n\t;"
-    "emms\n\t;" //clean
-    : "=m" (outputEntryPoint)/* output operands */
-    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2", "%xmm6", "%xmm7"/* clobbered operands */
-    );
+                "pminub %%xmm1,%%xmm0\n\t;"
+                "pminub %%xmm2,%%xmm0\n\t;"
+                "pminub %%xmm3,%%xmm0\n\t;"
+                "pminub %%xmm4,%%xmm0\n\t;"
+                "pminub %%xmm5,%%xmm0\n\t;"
+                "pminub %%xmm6,%%xmm0\n\t;"
+                
+                "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
+                "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
+                "vpsrldq $3,%%xmm0,%%xmm3\n\t;"
+                "vpsrldq $4,%%xmm0,%%xmm4\n\t;"
+                "vpsrldq $5,%%xmm0,%%xmm5\n\t;"
+                "vpsrldq $6,%%xmm0,%%xmm6\n\t;"
+                
+                
+                "pminub %%xmm0,%%xmm6\n\t;"
+                "pminub %%xmm1,%%xmm6\n\t;"
+                "pminub %%xmm2,%%xmm6\n\t;"
+                "pminub %%xmm3,%%xmm6\n\t;"
+                "pminub %%xmm4,%%xmm6\n\t;"
+                "pminub %%xmm5,%%xmm6\n\t;"
 
-}
+                "movdqu %%xmm6,(%%edi)\n\t;"
+                "add $10,%%esi\n\t;"
+                "add $10,%%edi\n\t;"
+                "sub $1,%%ecx\n\t;"
+                "jnz l4\n\t;"
+            "emms\n\t;" //clean
+        : "=m" (outputEntryPoint)/* output operands */
+        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+        : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4","%xmm5", "%xmm6", "%xmm7"/* clobbered operands */
+        );
+    }
+    else{
+       size_t nbr16Bblocks = data.size / 14;
+        __asm__ (
+            "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l2:"
+                "movdqu (%%esi),%%xmm0\n\t;"
+                "movdqu 1024(%%esi),%%xmm1\n\t;"
+                "movdqu 2048(%%esi),%%xmm2\n\t;"
 
-inline void applyMinTransfoInSIMby5(const RAW data, RAW res){
-    unsigned char * dataEntryPoint = &data.content[0];
-    unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 12;
-    __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l3:"
-            "movdqu (%%esi),%%xmm0\n\t;"
-            "movdqu 1024(%%esi),%%xmm1\n\t;"
-            "movdqu 2048(%%esi),%%xmm2\n\t;"
-            "movdqu 3072(%%esi),%%xmm3\n\t;"
-            "movdqu 4096(%%esi),%%xmm4\n\t;"
-            
+                "pminub %%xmm1,%%xmm0\n\t;"
+                "pminub %%xmm2,%%xmm0\n\t;"
+    
+                "vpsrldq $1,%%xmm0,%%xmm6\n\t;"
+                "vpsrldq $2,%%xmm0,%%xmm7\n\t;"
+                "pminub %%xmm7,%%xmm6\n\t;"
+                "pminub %%xmm0,%%xmm6\n\t;"
 
-            "pminub %%xmm1,%%xmm0\n\t;"
-            "pminub %%xmm2,%%xmm0\n\t;"
-            "pminub %%xmm3,%%xmm0\n\t;"
-            "pminub %%xmm4,%%xmm0\n\t;"
-            
-            "vpsrldq $1,%%xmm0,%%xmm4\n\t;"
-            "vpsrldq $2,%%xmm0,%%xmm5\n\t;"
-            "vpsrldq $3,%%xmm0,%%xmm6\n\t;"
-            "vpsrldq $4,%%xmm0,%%xmm7\n\t;"
-            
-            "pminub %%xmm5,%%xmm4\n\t;"
-            "pminub %%xmm6,%%xmm4\n\t;"
-            "pminub %%xmm7,%%xmm4\n\t;"
-            "pminub %%xmm0,%%xmm4\n\t;"
+                "movdqu %%xmm6,(%%edi)\n\t;"
+                "add $14,%%esi\n\t;"
+                "add $14,%%edi\n\t;"
+                "sub $1,%%ecx\n\t;"
+                "jnz l2\n\t;"
+            "emms\n\t;" //clean
+        : "=m" (outputEntryPoint)/* output operands */
+        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+        : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2", "%xmm6", "%xmm7"/* clobbered operands */
+        );
+    }
+    
 
-            "movdqu %%xmm4,(%%edi)\n\t;"
-            "add $12,%%esi\n\t;"
-            "add $12,%%edi\n\t;"
-            "sub $1,%%ecx\n\t;"
-            "jnz l3\n\t;"
-        "emms\n\t;" //clean
-    : "=m" (outputEntryPoint)/* output operands */
-    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4","%xmm5", "%xmm6", "%xmm7"/* clobbered operands */
-    );
-}
-
-inline void applyMinTransfoInSIMby7(const RAW data, RAW res){
-    unsigned char * dataEntryPoint = &data.content[0];
-    unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 10;
-    __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l4:"
-            "movdqu (%%esi),%%xmm0\n\t;"
-            "movdqu 1024(%%esi),%%xmm1\n\t;"
-            "movdqu 2048(%%esi),%%xmm2\n\t;"
-            "movdqu 3072(%%esi),%%xmm3\n\t;"
-            "movdqu 4096(%%esi),%%xmm4\n\t;"
-            "movdqu 5120(%%esi),%%xmm5\n\t;"
-            "movdqu 6144(%%esi),%%xmm6\n\t;"
-            
-
-            "pminub %%xmm1,%%xmm0\n\t;"
-            "pminub %%xmm2,%%xmm0\n\t;"
-            "pminub %%xmm3,%%xmm0\n\t;"
-            "pminub %%xmm4,%%xmm0\n\t;"
-            "pminub %%xmm5,%%xmm0\n\t;"
-            "pminub %%xmm6,%%xmm0\n\t;"
-            
-            "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
-            "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
-            "vpsrldq $3,%%xmm0,%%xmm3\n\t;"
-            "vpsrldq $4,%%xmm0,%%xmm4\n\t;"
-            "vpsrldq $5,%%xmm0,%%xmm5\n\t;"
-            "vpsrldq $6,%%xmm0,%%xmm6\n\t;"
-            
-            
-            "pminub %%xmm0,%%xmm6\n\t;"
-            "pminub %%xmm1,%%xmm6\n\t;"
-            "pminub %%xmm2,%%xmm6\n\t;"
-            "pminub %%xmm3,%%xmm6\n\t;"
-            "pminub %%xmm4,%%xmm6\n\t;"
-            "pminub %%xmm5,%%xmm6\n\t;"
-
-            "movdqu %%xmm6,(%%edi)\n\t;"
-            "add $10,%%esi\n\t;"
-            "add $10,%%edi\n\t;"
-            "sub $1,%%ecx\n\t;"
-            "jnz l4\n\t;"
-        "emms\n\t;" //clean
-    : "=m" (outputEntryPoint)/* output operands */
-    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4","%xmm5", "%xmm6", "%xmm7"/* clobbered operands */
-    );
 }
 
 inline void applyMaxTransfoInSIM(const RAW data, RAW res){
     unsigned char * dataEntryPoint = &data.content[0];
     unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 16;
-    __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l1:"
-            "movdqu (%%esi),%%xmm0\n\t;"
-            "movdqu 1024(%%esi),%%xmm1\n\t;"
-            "movdqu 2048(%%esi),%%xmm2\n\t;"
+    
+      if(box == 5){
+        size_t nbr16Bblocks = data.size / 12;
+        __asm__ (
+            "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l5:"
+                "movdqu (%%esi),%%xmm0\n\t;"
+                "movdqu 1024(%%esi),%%xmm1\n\t;"
+                "movdqu 2048(%%esi),%%xmm2\n\t;"
+                "movdqu 3072(%%esi),%%xmm3\n\t;"
+                "movdqu 4096(%%esi),%%xmm4\n\t;"
+                
 
-            "pmaxub %%xmm1,%%xmm0\n\t;"
-            "pmaxub %%xmm2,%%xmm0\n\t;"
+                "pmaxub %%xmm1,%%xmm0\n\t;"
+                "pmaxub %%xmm2,%%xmm0\n\t;"
+                "pmaxub %%xmm3,%%xmm0\n\t;"
+                "pmaxub %%xmm4,%%xmm0\n\t;"
+                
+                "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
+                "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
+                "vpsrldq $3,%%xmm0,%%xmm3\n\t;"
+                "vpsrldq $4,%%xmm0,%%xmm4\n\t;"
+                
+                "pmaxub %%xmm1,%%xmm4\n\t;"
+                "pmaxub %%xmm2,%%xmm4\n\t;"
+                "pmaxub %%xmm3,%%xmm4\n\t;"
+                "pmaxub %%xmm0,%%xmm4\n\t;"
 
-            "vpsrldq $1,%%xmm0,%%xmm3\n\t;"
-            "vpsrldq $2,%%xmm0,%%xmm4\n\t;"
-            
-            "pmaxub %%xmm4,%%xmm3\n\t;"
-            "pmaxub %%xmm0,%%xmm3\n\t;"
+                "movdqu %%xmm4,(%%edi)\n\t;"
+                "add $12,%%esi\n\t;"
+                "add $12,%%edi\n\t;"
+                "sub $1,%%ecx\n\t;"
+                "jnz l5\n\t;"
+            "emms\n\t;" //clean
+        : "=m" (outputEntryPoint)/* output operands */
+        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+        : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4"/* clobbered operands */
+        );
+    }
+    else if(box == 7){
+        size_t nbr16Bblocks = data.size / 10;
+        __asm__ (
+            "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l6:"
+                "movdqu (%%esi),%%xmm0\n\t;"
+                "movdqu 1024(%%esi),%%xmm1\n\t;"
+                "movdqu 2048(%%esi),%%xmm2\n\t;"
+                "movdqu 3072(%%esi),%%xmm3\n\t;"
+                "movdqu 4096(%%esi),%%xmm4\n\t;"
+                "movdqu 5120(%%esi),%%xmm5\n\t;"
+                "movdqu 6144(%%esi),%%xmm6\n\t;"
+                
 
-            "movdqu %%xmm3,(%%edi)\n\t;"
-            "add $14,%%esi\n\t;"
-            "add $14,%%edi\n\t;"
-            "sub $1,%%ecx\n\t;"
-            "jnz l1\n\t;"
-    : "=m" (outputEntryPoint)/* output operands */
-    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4"/* clobbered operands */
-    );
+                "pmaxub %%xmm1,%%xmm0\n\t;"
+                "pmaxub %%xmm2,%%xmm0\n\t;"
+                "pmaxub %%xmm3,%%xmm0\n\t;"
+                "pmaxub %%xmm4,%%xmm0\n\t;"
+                "pmaxub %%xmm5,%%xmm0\n\t;"
+                "pmaxub %%xmm6,%%xmm0\n\t;"
+                
+                "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
+                "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
+                "vpsrldq $3,%%xmm0,%%xmm3\n\t;"
+                "vpsrldq $4,%%xmm0,%%xmm4\n\t;"
+                "vpsrldq $5,%%xmm0,%%xmm5\n\t;"
+                "vpsrldq $6,%%xmm0,%%xmm6\n\t;"
+                
+                
+                "pmaxub %%xmm0,%%xmm6\n\t;"
+                "pmaxub %%xmm1,%%xmm6\n\t;"
+                "pmaxub %%xmm2,%%xmm6\n\t;"
+                "pmaxub %%xmm3,%%xmm6\n\t;"
+                "pmaxub %%xmm4,%%xmm6\n\t;"
+                "pmaxub %%xmm5,%%xmm6\n\t;"
 
+                "movdqu %%xmm6,(%%edi)\n\t;"
+                "add $10,%%esi\n\t;"
+                "add $10,%%edi\n\t;"
+                "sub $1,%%ecx\n\t;"
+                "jnz l6\n\t;"
+            "emms\n\t;" //clean
+        : "=m" (outputEntryPoint)/* output operands */
+        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+        : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4","%xmm5", "%xmm6"/* clobbered operands */
+        );
+    }
+    else{
+        size_t nbr16Bblocks = data.size / 14;
+        __asm__ (
+            "movl %2,%%esi\n\t;"
+            "movl %1,%%ecx\n\t;"
+            "movl %0,%%edi\n\t;"
+            "l1:"
+                "movdqu (%%esi),%%xmm0\n\t;"
+                "movdqu 1024(%%esi),%%xmm1\n\t;"
+                "movdqu 2048(%%esi),%%xmm2\n\t;"
+
+                "pmaxub %%xmm1,%%xmm0\n\t;"
+                "pmaxub %%xmm2,%%xmm0\n\t;"
+
+                "vpsrldq $1,%%xmm0,%%xmm3\n\t;"
+                "vpsrldq $2,%%xmm0,%%xmm4\n\t;"
+                
+                "pmaxub %%xmm4,%%xmm3\n\t;"
+                "pmaxub %%xmm0,%%xmm3\n\t;"
+
+                "movdqu %%xmm3,(%%edi)\n\t;"
+                "add $14,%%esi\n\t;"
+                "add $14,%%edi\n\t;"
+                "sub $1,%%ecx\n\t;"
+                "jnz l1\n\t;"
+            "emms\n\t;" //clean
+        : "=m" (outputEntryPoint)/* output operands */
+        : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
+        : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4"/* clobbered operands */
+        );
+    }
 }
-
-inline void applyMaxTransfoInSIMby5(const RAW data, RAW res){
-    unsigned char * dataEntryPoint = &data.content[0];
-    unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 12;
-    __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l5:"
-            "movdqu (%%esi),%%xmm0\n\t;"
-            "movdqu 1024(%%esi),%%xmm1\n\t;"
-            "movdqu 2048(%%esi),%%xmm2\n\t;"
-            "movdqu 3072(%%esi),%%xmm3\n\t;"
-            "movdqu 4096(%%esi),%%xmm4\n\t;"
-            
-
-            "pmaxub %%xmm1,%%xmm0\n\t;"
-            "pmaxub %%xmm2,%%xmm0\n\t;"
-            "pmaxub %%xmm3,%%xmm0\n\t;"
-            "pmaxub %%xmm4,%%xmm0\n\t;"
-            
-            "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
-            "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
-            "vpsrldq $3,%%xmm0,%%xmm3\n\t;"
-            "vpsrldq $4,%%xmm0,%%xmm4\n\t;"
-            
-            "pmaxub %%xmm1,%%xmm4\n\t;"
-            "pmaxub %%xmm2,%%xmm4\n\t;"
-            "pmaxub %%xmm3,%%xmm4\n\t;"
-            "pmaxub %%xmm0,%%xmm4\n\t;"
-
-            "movdqu %%xmm4,(%%edi)\n\t;"
-            "add $12,%%esi\n\t;"
-            "add $12,%%edi\n\t;"
-            "sub $1,%%ecx\n\t;"
-            "jnz l5\n\t;"
-        "emms\n\t;" //clean
-    : "=m" (outputEntryPoint)/* output operands */
-    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4"/* clobbered operands */
-    );
-}
-
-inline void applyMaxTransfoInSIMby7(const RAW data, RAW res){
-    unsigned char * dataEntryPoint = &data.content[0];
-    unsigned char * outputEntryPoint = &res.content[0];
-    size_t nbr16Bblocks = data.size / 10;
-    __asm__ (
-        "movl %2,%%esi\n\t;"
-        "movl %1,%%ecx\n\t;"
-        "movl %0,%%edi\n\t;"
-        "l6:"
-            "movdqu (%%esi),%%xmm0\n\t;"
-            "movdqu 1024(%%esi),%%xmm1\n\t;"
-            "movdqu 2048(%%esi),%%xmm2\n\t;"
-            "movdqu 3072(%%esi),%%xmm3\n\t;"
-            "movdqu 4096(%%esi),%%xmm4\n\t;"
-            "movdqu 5120(%%esi),%%xmm5\n\t;"
-            "movdqu 6144(%%esi),%%xmm6\n\t;"
-            
-
-            "pmaxub %%xmm1,%%xmm0\n\t;"
-            "pmaxub %%xmm2,%%xmm0\n\t;"
-            "pmaxub %%xmm3,%%xmm0\n\t;"
-            "pmaxub %%xmm4,%%xmm0\n\t;"
-            "pmaxub %%xmm5,%%xmm0\n\t;"
-            "pmaxub %%xmm6,%%xmm0\n\t;"
-            
-            "vpsrldq $1,%%xmm0,%%xmm1\n\t;"
-            "vpsrldq $2,%%xmm0,%%xmm2\n\t;"
-            "vpsrldq $3,%%xmm0,%%xmm3\n\t;"
-            "vpsrldq $4,%%xmm0,%%xmm4\n\t;"
-            "vpsrldq $5,%%xmm0,%%xmm5\n\t;"
-            "vpsrldq $6,%%xmm0,%%xmm6\n\t;"
-            
-            
-            "pmaxub %%xmm0,%%xmm6\n\t;"
-            "pmaxub %%xmm1,%%xmm6\n\t;"
-            "pmaxub %%xmm2,%%xmm6\n\t;"
-            "pmaxub %%xmm3,%%xmm6\n\t;"
-            "pmaxub %%xmm4,%%xmm6\n\t;"
-            "pmaxub %%xmm5,%%xmm6\n\t;"
-
-            "movdqu %%xmm6,(%%edi)\n\t;"
-            "add $10,%%esi\n\t;"
-            "add $10,%%edi\n\t;"
-            "sub $1,%%ecx\n\t;"
-            "jnz l6\n\t;"
-        "emms\n\t;" //clean
-    : "=m" (outputEntryPoint)/* output operands */
-    : "g" (nbr16Bblocks), "m" (dataEntryPoint) /* input operands */
-    : "%esi",  "%ecx", "%edi", "%xmm0", "%xmm1", "%xmm2","%xmm3","%xmm4","%xmm5", "%xmm6"/* clobbered operands */
-    );
-}
-
 
 int main() {
-
     // time var
     time_t start_time, end_time ;
     float dt ;
@@ -379,7 +370,6 @@ int main() {
     // data struct, we assign memory
     RAW rawMinDataC;
 
-
     // IN
     errorCode = loadFile(inpath, rawMinDataC, 1024);
     if (errorCode != 1)  // failure
@@ -387,13 +377,6 @@ int main() {
 
     dataOutC.content = (unsigned char*)malloc(rawMinDataC.size);
     dataOutC.size = rawMinDataC.size;
-
-    //*
-    dataOutC.width = rawMinDataC.width;
-    RAW temp;
-    temp.content = (unsigned char*)malloc(rawMinDataC.size);
-    temp.size = rawMinDataC.size;
-    //*/
     
     start_time = clock ();
     applyMinTransfoInC(rawMinDataC,dataOutC,box);
@@ -401,7 +384,12 @@ int main() {
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
     
     /*
-     for(int i = 0; i < 5; i++){
+    dataOutC.width = rawMinDataC.width;
+    RAW temp;
+    temp.content = (unsigned char*)malloc(rawMinDataC.size);
+    temp.size = rawMinDataC.size;
+    
+    for(int i = 0; i < 5; i++){
         applyMinTransfoInC(dataOutC,temp,box);
         for(int j = 0; j < temp.size; j++){
            dataOutC.content[j] = temp.content[j]; 
@@ -451,13 +439,6 @@ int main() {
     RAW dataOutSIMD;
     dataOutSIMD.content = (unsigned char*)malloc(rawMinDataC.size);
     dataOutSIMD.size = rawMinDataC.size;
-    
-    //*
-    dataOutSIMD.width = rawMinDataC.width;
-
-    temp.content = (unsigned char*)malloc(rawMinDataC.size);
-    temp.size = rawMinDataC.size;
-    //*/
 
     RAW rawMinDataASM;
     // IN
@@ -465,33 +446,24 @@ int main() {
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
-    if(box == 5){
-        start_time = clock ();
-        applyMinTransfoInSIMby5(rawMinDataASM, dataOutSIMD);
-        end_time = clock ();
-        dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
-    }
-    else if(box == 7){
-        start_time = clock ();
-        applyMinTransfoInSIMby7(rawMinDataASM, dataOutSIMD);
-        end_time = clock ();
-        dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
-    }
-    else{
-        start_time = clock ();
-        applyMinTransfoInSIM(rawMinDataASM, dataOutSIMD);
-        end_time = clock ();
-        dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
+    start_time = clock ();
+    applyMinTransfoInSIM(rawMinDataASM, dataOutSIMD);
+    end_time = clock ();
+    dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
         
-        /*
-        for(int i = 0; i < 5; i++){
-            applyMinTransfoInSIM(dataOutSIMD,temp);
-            for(int j = 0; j < temp.size; j++){
-                dataOutSIMD.content[j] = temp.content[j]; 
-            }
+    /*
+    dataOutSIMD.width = rawMinDataC.width;
+
+    temp.content = (unsigned char*)malloc(rawMinDataC.size);
+    temp.size = rawMinDataC.size;
+    
+    for(int i = 0; i < 5; i++){
+        applyMinTransfoInSIM(dataOutSIMD,temp);
+        for(int j = 0; j < temp.size; j++){
+            dataOutSIMD.content[j] = temp.content[j]; 
         }
-        //*/
     }
+    //*/
 
     printf("Time needed in SIMD (min) : %.6f \n", dt);
 
@@ -511,24 +483,10 @@ int main() {
     if (errorCode != 1)  // failure
         return 1; // leave on failure
 
-    if(box == 5){
-        start_time = clock ();
-        applyMaxTransfoInSIMby5(rawMinDataASM, dataOutSIMD);
-        end_time = clock ();
-        dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
-    }
-    else if(box == 7){
-        start_time = clock ();
-        applyMaxTransfoInSIMby7(rawMinDataASM, dataOutSIMD);
-        end_time = clock ();
-        dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
-    }
-    else{
-        start_time = clock ();
-        applyMaxTransfoInSIM(rawMaxDataASM, dataOutSIMD);
-        end_time = clock ();
-        dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
-    }
+    start_time = clock ();
+    applyMaxTransfoInSIM(rawMaxDataASM, dataOutSIMD);
+    end_time = clock ();
+    dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
     printf("Time needed in SIMD (max) : %.6f \n", dt);
 
