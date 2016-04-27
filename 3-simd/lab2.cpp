@@ -70,7 +70,7 @@ inline void applyMinTransfoInC(const RAW data, RAW res, int width){
             for(int i = 0; i < width; ++i){
                 for(int j = 0; j < width; ++j)
                 {
-                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) < data.size)
+                    if( (w + t + i)*data.width + (h + t + j) < data.size)
                         m = min(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
                 } 
             }
@@ -89,7 +89,7 @@ inline void applyMaxTransfoInC(const RAW data, RAW res, int width){
             for(int i = 0; i < width; ++i){
                 for(int j = 0; j < width; ++j)
                 {
-                    if((w + t + i)*data.width + (h + t + j) >= 0 && (w + t + i)*data.width + (h + t + j) < data.size)
+                    if( (w + t + i)*data.width + (h + t + j) < data.size)
                         m = max(m,data.content[(w + t + i)*data.width + (h + t + j)]);  
                 } 
             }
@@ -97,7 +97,7 @@ inline void applyMaxTransfoInC(const RAW data, RAW res, int width){
     }
 }
 
-inline void applyMinTransfoInSIM(const RAW data, RAW res){
+inline void applyMinTransfoInSIM(const RAW data, RAW res, int box){
     unsigned char * dataEntryPoint = &data.content[0];
     unsigned char * outputEntryPoint = &res.content[0];  
     if(box == 5){
@@ -223,7 +223,7 @@ inline void applyMinTransfoInSIM(const RAW data, RAW res){
 
 }
 
-inline void applyMaxTransfoInSIM(const RAW data, RAW res){
+inline void applyMaxTransfoInSIM(const RAW data, RAW res, int box){
     unsigned char * dataEntryPoint = &data.content[0];
     unsigned char * outputEntryPoint = &res.content[0];
     
@@ -447,7 +447,7 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMinTransfoInSIM(rawMinDataASM, dataOutSIMD);
+    applyMinTransfoInSIM(rawMinDataASM, dataOutSIMD,box);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
         
@@ -484,7 +484,7 @@ int main() {
         return 1; // leave on failure
 
     start_time = clock ();
-    applyMaxTransfoInSIM(rawMaxDataASM, dataOutSIMD);
+    applyMaxTransfoInSIM(rawMaxDataASM, dataOutSIMD,box);
     end_time = clock ();
     dt = (end_time-start_time)/(float)(CLOCKS_PER_SEC) ;
 
